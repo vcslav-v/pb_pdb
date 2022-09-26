@@ -17,6 +17,7 @@ class Product(Base):
     trello_card_id = Column(Text, unique=True)
     readable_uid = Column(Text, unique=True)
     work_title = Column(Text)
+    title = Column(Text)
     cover = Column(LargeBinary)
     start_date = Column(Date, default=datetime.utcnow().date())
     description = Column(Text)

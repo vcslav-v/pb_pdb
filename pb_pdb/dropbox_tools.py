@@ -20,9 +20,10 @@ def get_share_link(path: str) -> str:
         return shared_link.url
 
 
-def rename(name: str, new_name: str):
+def rename(path: str, new_name: str):
+    new_path = '/'.join(path.split('/')[:-1] + [new_name])
     with dropbox.Dropbox(DROPBOX_KEY) as dbx:
         try:
-            dbx.files_move_v2(f'/{name}', f'/{new_name}')
+            dbx.files_move_v2(path, new_path)
         except Exception:
             raise ValueError('folder is not exist')

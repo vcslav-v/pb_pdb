@@ -121,3 +121,12 @@ def make_subproduct(card_id: str) -> str:
             trello.cards.delete_attachment_idAttachment(attach_id, card_id)
 
     return product_name
+
+
+def make_final_text(card_id: str):
+    trello = TrelloApi(TRELLO_APP_KEY)
+    trello.set_token(TRELLO_AUTH_KEY)
+    product_card = trello.cards.get(card_id)
+    description = product_card['desc']
+    _own_id, _parrent_uid, title = get_full_name(product_card['name'])
+    db_tools.make_final_text(card_id, title, description)

@@ -46,3 +46,9 @@ def make_subproduct_name(card_id: str):
     name = trello_tools.make_subproduct(card_id)
     logger.debug(name)
     return schemas.TrelloProduct(name=name)
+
+
+@router.get('/make_final_text')
+@logger.catch
+def make_final_text(card_id: str):
+    trello_tools.make_final_text(card_id)
