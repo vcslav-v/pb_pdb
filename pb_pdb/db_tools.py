@@ -63,12 +63,13 @@ def is_child(card_id: str) -> bool:
             return bool(db_product.parent_id)
 
 
-def make_final_text(card_id: str, title: str, description: str):
+def make_final_text(card_id: str, card_name: str, title: str, description: str):
     with SessionLocal() as session:
         db_product = session.query(models.Product).filter_by(
             trello_card_id=card_id
         ).first()
-        dropbox_tools.rename(db_product.work_directory, title)
+        new_path = dropbox_tools.rename(db_product.work_directory, card_name)
         db_product.title = title
         db_product.description = description
+        db_product.work_directory = new_path
         session.commit()

@@ -128,5 +128,5 @@ def make_final_text(card_id: str):
     trello.set_token(TRELLO_AUTH_KEY)
     product_card = trello.cards.get(card_id)
     description = product_card['desc']
-    _own_id, _parrent_uid, title = get_full_name(product_card['name'])
-    db_tools.make_final_text(card_id, title, description)
+    own_id, parrent_uid, title = get_full_name(product_card['name'])
+    db_tools.make_final_text(card_id, product_card['name'], title, description)
