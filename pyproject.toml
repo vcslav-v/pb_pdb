@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "pb_pdb"
+version = "0.1.0"
+description = ""
+authors = ["vaclav-v"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+loguru = "^0.6.0"
+fastapi = "^0.84.0"
+gunicorn = "^20.1.0"
+uvicorn = "^0.18.3"
+python-multipart = "^0.0.5"
+pydantic = "^1.10.2"
+SQLAlchemy = "^1.4.41"
+psycopg2-binary = "^2.9.3"
+alembic = "^1.8.1"
+trello = "^0.9.7"
+dropbox = "^11.34.0"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^5.0.4"
+mypy = "^0.971"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
