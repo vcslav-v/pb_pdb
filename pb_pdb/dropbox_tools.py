@@ -10,7 +10,7 @@ def make_directory(name: str) -> str:
         try:
             dbx.files_create_folder_v2(new_dir_path)
         except Exception:
-            raise ValueError('folder is exist already')
+            raise ValueError(f'folder is exist already - {name}')
     return new_dir_path
 
 
@@ -26,5 +26,5 @@ def rename(path: str, new_name: str) -> str:
         try:
             dbx.files_move_v2(path, new_path)
         except Exception:
-            raise ValueError('folder is not exist')
+            raise ValueError(f'folder is not exist - {new_name}')
     return new_path
