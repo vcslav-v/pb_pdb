@@ -46,7 +46,11 @@ def add_product(product: schemas.Product, designer: schemas.Employee) -> str:
             db_product.readable_uid = f'{db_product.readable_uid} ({db_parrent.readable_uid})'
 
         full_product_name = f'{db_product.readable_uid} - {product.title}'
-        db_product.work_directory = dropbox_tools.make_directory(full_product_name)
+        db_product.work_directory = dropbox_tools.make_directory(
+            product.category,
+            product.title,
+            full_product_name,
+        )
         db_product.dropbox_share_url = dropbox_tools.get_share_link(db_product.work_directory)
 
         session.commit()
@@ -68,7 +72,11 @@ def make_final_text(card_id: str, card_name: str, title: str, description: str):
         db_product = session.query(models.Product).filter_by(
             trello_card_id=card_id
         ).first()
-        new_path = dropbox_tools.rename(db_product.work_directory, card_name)
+        new_path = dropbox_tools.rename(
+            db_product.work_directory,
+            card_name, title,
+            db_product.title
+        )
         db_product.title = title
         db_product.description = description
         db_product.work_directory = new_path
