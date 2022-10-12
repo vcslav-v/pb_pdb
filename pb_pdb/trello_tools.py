@@ -113,6 +113,10 @@ def make_subproduct(card_id: str) -> str:
         short_link_card = re.findall(r'(?<=/c/).*', attach['url'])
         if is_trello_url and short_link_card:
             short_link_cards.append((short_link_card[0], attach['id']))
+        is_dropbox_url = 'dropbox.com' in urlparse(attach['url']).netloc
+        if is_dropbox_url:
+            trello.cards.delete_attachment_idAttachment(short_link_card[0], attach['id'])
+        
 
     for short_link_card, attach_id in short_link_cards:
         card = trello.cards.get(short_link_card)
