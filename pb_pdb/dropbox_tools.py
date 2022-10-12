@@ -7,10 +7,10 @@ DROPBOX_KEY = os.environ.get('DROPBOX_KEY', '')
 def make_directory(category: str, title: str, full_name: str) -> str:
     new_dir_path = f'Products/{category}/{full_name}'
     with dropbox.Dropbox(DROPBOX_KEY) as dbx:
-        try:
-            dbx.files_create_folder_v2(new_dir_path)
-        except Exception:
-            raise ValueError(f'folder is exist already - {full_name}')
+        # try:
+        dbx.files_create_folder_v2(new_dir_path)
+        # except Exception:
+            # raise ValueError(f'folder is exist already - {full_name}')
         
         dbx.files_create_folder_v2(new_dir_path + f'/{title}')
         dbx.files_create_folder_v2(new_dir_path + '/Preview files')
