@@ -34,5 +34,5 @@ def rename(path: str, new_name: str, title: str, old_title: str) -> str:
         except Exception:
             raise ValueError(f'folder is not exist - {new_name}')
         
-        dbx.files_move_v2(path + f'/{old_title}', new_path + f'/{title}')
+        dbx.files_move_v2(new_path + f'/{old_title}', new_path + f'/{title}')
     return new_path
