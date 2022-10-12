@@ -74,8 +74,9 @@ def make_final_text(card_id: str, card_name: str, title: str, description: str):
         ).first()
         new_path = dropbox_tools.rename(
             db_product.work_directory,
-            card_name, title,
-            db_product.title
+            card_name, 
+            title,
+            db_product.work_title,
         )
         db_product.title = title
         db_product.description = description
