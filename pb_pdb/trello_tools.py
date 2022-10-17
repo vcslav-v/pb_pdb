@@ -143,23 +143,19 @@ def get_publish_links(card_id: str) -> dict:
 
     url = f'https://api.trello.com/1/boards/{product_card["idBoard"]}/customFields'
 
-    headers = {
-    '   Accept': 'application/json'
-    }
-
     query = {
         'key': TRELLO_APP_KEY,
         'token': TRELLO_AUTH_KEY
     }
 
-    response = requests.request('GET', url, headers=headers, params=query)
+    response = requests.get(url, params=query)
     board_fields = json.loads(response.text)
     board_field_ids = {}
     for board_field in board_fields:
         board_field_ids[board_field['id']] = board_fields['name']
 
     url = f'https://api.trello.com/1/cards/{card_id}/customFieldItems'
-    response = requests.request('GET', url, headers=headers, params=query)
+    response = requests.get(url, params=query)
     card_fields = json.loads(response.text)
     card_fields_values = {}
     for card_field in card_fields:
