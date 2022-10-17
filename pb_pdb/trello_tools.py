@@ -172,6 +172,6 @@ def get_publish_links(card_id: str) -> dict:
 
 def publish(card_id: str):
     links = get_publish_links(card_id)
-    logger.info(card_id)
-    logger.info(links)
+    print(card_id)
+    print(links)
     db_tools.publish_product(card_id, links)
