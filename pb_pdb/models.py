@@ -31,6 +31,8 @@ class Product(Base):
     category_id = Column(Integer, ForeignKey('categories.id'))
     category = relationship('Category')
 
+    market_place_links = relationship('MarketPlaceLink', back_populates='product', uselist=False)
+
     parent_id = Column(Integer, ForeignKey('products.id'))
     parent = relationship('Product', remote_side=[id])
 
@@ -61,3 +63,25 @@ class Employee(Base):
     user_pick = Column(LargeBinary)
 
     products_as_designer = relationship('Product', back_populates='designer')
+
+
+class MarketPlaceLink(Base):
+    '''Market Place Link.'''
+
+    __tablename__ = 'market_place_links'
+
+    id = Column(Integer, primary_key=True)
+    pixelbuddha = Column(Text)
+    creative_market = Column(Text)
+    you_work_for_them = Column(Text)
+    yellow_images = Column(Text)
+    designcuts = Column(Text)
+    elements = Column(Text)
+    art_station = Column(Text)
+    freepick = Column(Text)
+    adobe_stock = Column(Text)
+    graphicriver = Column(Text)
+    etsy = Column(Text)
+
+    product_id = Column(Integer, ForeignKey('products.id'))
+    product = relationship('Product', back_populates='market_place_links')

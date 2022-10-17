@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from typing import Optional
@@ -133,3 +134,43 @@ def make_final_text(card_id: str):
     description = product_card['desc']
     own_id, parrent_uid, title = get_full_name(product_card['name'])
     db_tools.make_final_text(card_id, product_card['name'], title, description)
+
+
+def get_publish_links(card_id: str) -> dict:
+    trello = TrelloApi(TRELLO_APP_KEY)
+    trello.set_token(TRELLO_AUTH_KEY)
+    product_card = trello.cards.get(card_id)
+
+    url = f'https://api.trello.com/1/boards/{product_card["idBoard"]}/customFields'
+
+    headers = {
+    '   Accept': 'application/json'
+    }
+
+    query = {
+        'key': TRELLO_APP_KEY,
+        'token': TRELLO_AUTH_KEY
+    }
+
+    response = requests.request('GET', url, headers=headers, params=query)
+    board_fields = json.loads(response.text)
+    board_field_ids = {}
+    for board_field in board_fields:
+        board_field_ids[board_field['id']] = board_fields['name']
+
+    url = f'https://api.trello.com/1/cards/{card_id}/customFieldItems'
+    response = requests.request('GET', url, headers=headers, params=query)
+    card_fields = json.loads(response.text)
+    card_fields_values = {}
+    for card_field in card_fields:
+        #TODO expect no text value
+        name = board_field_ids[card_field['id']]
+        value = card_field['value']['text']
+        card_fields_values[name] = value
+    
+    return card_fields_values
+
+
+def publish(card_id: str):
+    links = get_publish_links(card_id)
+    db_tools.publish_product(card_id, links)

@@ -52,3 +52,9 @@ def make_subproduct_name(card_id: str):
 @logger.catch
 def make_final_text(card_id: str):
     trello_tools.make_final_text(card_id)
+
+
+@router.get('/publish')
+@logger.catch
+def make_final_text(card_id: str):
+    trello_tools.publish(card_id)
