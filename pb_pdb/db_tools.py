@@ -91,7 +91,11 @@ def publish_product(card_id: str, links: dict):
         db_product = session.query(models.Product).filter_by(
             trello_card_id=card_id
         ).first()
-        db_links = models.MarketPlaceLink()
+        if db_product.market_place_links:
+            db_links = db_product.market_place_links
+        else:
+            db_links = models.MarketPlaceLink()
+            session.add(db_links)
         logger.debug(card_id)
         logger.debug(links)
         if links.get('PB link') and urlparse(links.get('PB link')).netloc:
@@ -117,7 +121,6 @@ def publish_product(card_id: str, links: dict):
         elif links.get('Etsy link') and urlparse(links.get('Etsy link')).netloc:
             db_links.etsy = links.get('Etsy link')
         
-        session.add(db_links)
         db_product.market_place_links = db_links
         db_product.done = True
         session.commit()
