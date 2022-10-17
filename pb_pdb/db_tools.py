@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -91,6 +92,8 @@ def publish_product(card_id: str, links: dict):
             trello_card_id=card_id
         ).first()
         db_links = models.MarketPlaceLink()
+        logger.debug(card_id)
+        logger.debug(links)
         if links.get('PB link') and urlparse(links.get('PB link')).netloc:
             db_links.pixelbuddha = links.get('PB link')
         elif links.get('CM link') and urlparse(links.get('CM link')).netloc:
