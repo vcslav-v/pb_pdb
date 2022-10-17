@@ -87,6 +87,8 @@ def make_final_text(card_id: str, card_name: str, title: str, description: str):
 
 
 def publish_product(card_id: str, links: dict):
+    logger.debug(card_id)
+    logger.debug(links)
     with SessionLocal() as session:
         db_product = session.query(models.Product).filter_by(
             trello_card_id=card_id
