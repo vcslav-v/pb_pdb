@@ -1,4 +1,3 @@
-from asyncio.log import logger
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -87,8 +86,6 @@ def make_final_text(card_id: str, card_name: str, title: str, description: str):
 
 
 def publish_product(card_id: str, links: dict):
-    logger.debug(card_id)
-    logger.debug(links)
     with SessionLocal() as session:
         db_product = session.query(models.Product).filter_by(
             trello_card_id=card_id
@@ -98,8 +95,6 @@ def publish_product(card_id: str, links: dict):
         else:
             db_links = models.MarketPlaceLink()
             session.add(db_links)
-        logger.debug(card_id)
-        logger.debug(links)
         if links.get('PB link') and urlparse(links.get('PB link')).netloc:
             db_links.pixelbuddha = links.get('PB link')
         elif links.get('CM link') and urlparse(links.get('CM link')).netloc:

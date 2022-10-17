@@ -1,4 +1,3 @@
-from asyncio.log import logger
 import json
 import os
 import re
@@ -159,8 +158,6 @@ def get_publish_links(card_id: str) -> dict:
     response = requests.get(url, params=query)
     card_fields = json.loads(response.text)
     card_fields_values = {}
-    print(card_fields)
-    print(board_field_ids)
     for card_field in card_fields:
         #TODO expect no text value
         name = board_field_ids.get(card_field['idCustomField'])
@@ -174,6 +171,4 @@ def get_publish_links(card_id: str) -> dict:
 
 def publish(card_id: str):
     links = get_publish_links(card_id)
-    print(card_id)
-    print(links)
     db_tools.publish_product(card_id, links)
