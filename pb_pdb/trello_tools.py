@@ -160,6 +160,7 @@ def get_publish_links(card_id: str) -> dict:
     card_fields = json.loads(response.text)
     card_fields_values = {}
     print(card_fields)
+    print(board_field_ids)
     for card_field in card_fields:
         #TODO expect no text value
         name = board_field_ids.get(card_field['id'])
