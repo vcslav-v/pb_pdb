@@ -163,7 +163,7 @@ def get_publish_links(card_id: str) -> dict:
     print(board_field_ids)
     for card_field in card_fields:
         #TODO expect no text value
-        name = board_field_ids.get(card_field['id'])
+        name = board_field_ids.get(card_field['idCustomField'])
         if not name:
             continue
         value = card_field['value']['text']
