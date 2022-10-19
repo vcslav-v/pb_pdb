@@ -29,6 +29,8 @@ def get_share_link(path: str) -> str:
 
 def rename(path: str, new_name: str, title: str, old_title: str) -> str:
     new_path = '/'.join(path.split('/')[:-1] + [new_name])
+    if path == new_path:
+        return new_path
     with dropbox.Dropbox(oauth2_refresh_token=DROPBOX_KEY, app_key=APP_KEY) as dbx:
         try:
             dbx.files_move_v2(path, new_path)
