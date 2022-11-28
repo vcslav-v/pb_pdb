@@ -17,6 +17,8 @@ def make_directory(category: str, title: str, full_name: str) -> str:
         dbx.files_create_folder_v2(new_dir_path + '/Preview files')
         dbx.files_create_folder_v2(new_dir_path + '/Preview source')
         dbx.files_create_folder_v2(new_dir_path + '/Source images')
+        dbx.files_create_folder_v2(new_dir_path + '/Freepik')
+        dbx.files_create_folder_v2(new_dir_path + '/Adobe')
 
     return new_dir_path
 
