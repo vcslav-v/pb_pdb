@@ -24,6 +24,8 @@ class Product(Base):
     work_directory = Column(Text)
     done = Column(Boolean, default=False)
     dropbox_share_url = Column(Text)
+    trello_link = Column(Text)
+
 
     designer_id = Column(Integer, ForeignKey('employees.id'))
     designer = relationship('Employee')

@@ -137,7 +137,7 @@ def get_products() -> schemas.ProductPage:
                 designer_id = db_product.designer.id,
                 category = db_product.category.name,
                 category_id = db_product.category.id,
-                trello_link = db_product.trello_card_id,
+                trello_link = db_product.trello_link,
                 dropbox_link = db_product.dropbox_share_url,
                 is_done = db_product.done,
             ))
@@ -151,7 +151,7 @@ def get_products() -> schemas.ProductPage:
                         designer_id = child.designer.id,
                         category = child.category.name,
                         category_id = child.category.id,
-                        trello_link = child.trello_card_id,
+                        trello_link = child.trello_link,
                         dropbox_link = child.dropbox_share_url,
                         is_done = child.done,
                     ))
