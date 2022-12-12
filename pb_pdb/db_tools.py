@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 
 from pb_pdb import dropbox_tools, models, schemas
 from pb_pdb.db import SessionLocal
+from datetime import datetime
 
 
 def get_exist_category_from_list(labels: list[str]) -> Optional[str]:
@@ -121,3 +122,37 @@ def publish_product(card_id: str, links: dict):
         db_product.market_place_links = db_links
         db_product.done = True
         session.commit()
+
+
+def get_products() -> schemas.ProductPage:
+    result = schemas.ProductPage()
+    with SessionLocal() as session:
+        db_products = session.query(models.Product).filter_by(parent_id=None).all()
+        for db_product in db_products:
+            result.products.append(schemas.ProductInPage(
+                ident = db_product.readable_uid,
+                title = db_product.title if db_product.title else db_product.work_title,
+                short_description = db_product.description[:20] if db_product.description else '',
+                designer_name = db_product.designer.full_name,
+                designer_id = db_product.designer.id,
+                category = db_product.category.name,
+                category_id = db_product.category.id,
+                trello_link = db_product.trello_card_id,
+                dropbox_link = db_product.dropbox_share_url,
+                is_done = db_product.done,
+            ))
+            if db_product.children:
+                for child in db_product.children:
+                    result.products[-1].children.append(schemas.ProductInPage(
+                        ident = child.readable_uid,
+                        title = child.title if child.title else child.work_title,
+                        short_description = child.description[:20] if child.description else '',
+                        designer_name = child.designer.full_name,
+                        designer_id = child.designer.id,
+                        category = child.category.name,
+                        category_id = child.category.id,
+                        trello_link = child.trello_card_id,
+                        dropbox_link = child.dropbox_share_url,
+                        is_done = child.done,
+                    ))
+    return result

@@ -4,7 +4,7 @@ import secrets
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from loguru import logger
-from pb_pdb import schemas, trello_tools
+from pb_pdb import schemas, trello_tools, db_tools
 
 router = APIRouter()
 security = HTTPBasic()
@@ -58,3 +58,11 @@ def make_final_text(card_id: str):
 @logger.catch
 def make_final_text(card_id: str):
     trello_tools.publish(card_id)
+
+
+@router.get('/products')
+@logger.catch
+def get_products(card_id: str) -> schemas.ProductPage:
+    produts = db_tools.get_products()
+    produts = trello_tools.get_links(produts)
+    return produts

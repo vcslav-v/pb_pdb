@@ -172,3 +172,21 @@ def get_publish_links(card_id: str) -> dict:
 def publish(card_id: str):
     links = get_publish_links(card_id)
     db_tools.publish_product(card_id, links)
+
+
+def change_card_id_to_url(product: schemas.ProductInPage) -> schemas.ProductInPage:
+    new_product = product.copy()
+    new_product.children = []
+    trello = TrelloApi(TRELLO_APP_KEY)
+    trello_card = trello.cards.get(new_product.trello_link)
+    new_product.trello_link = trello_card['url']
+    for child in product.children:
+        new_product.children.append(change_card_id_to_url(child))
+    return new_product
+
+
+def get_links(raw_products: schemas.ProductPage) -> schemas.ProductPage:
+    result = schemas.ProductPage()
+    for raw_product in raw_products:
+        result.products.append(change_card_id_to_url(raw_product))
+    return result
