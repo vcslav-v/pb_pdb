@@ -187,6 +187,6 @@ def change_card_id_to_url(product: schemas.ProductInPage) -> schemas.ProductInPa
 
 def get_links(raw_products: schemas.ProductPage) -> schemas.ProductPage:
     result = schemas.ProductPage()
-    for raw_product in raw_products:
+    for raw_product in raw_products.products:
         result.products.append(change_card_id_to_url(raw_product))
     return result

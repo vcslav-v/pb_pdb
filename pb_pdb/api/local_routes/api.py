@@ -62,7 +62,7 @@ def make_final_text(card_id: str):
 
 @router.get('/products')
 @logger.catch
-def get_products(card_id: str) -> schemas.ProductPage:
+def get_products() -> schemas.ProductPage:
     produts = db_tools.get_products()
     produts = trello_tools.get_links(produts)
     return produts
