@@ -5,6 +5,7 @@ from typing import Optional
 
 class Product(BaseModel):
     trello_card_id: str
+    trello_link: str
     title: str
     description: str
     category: str

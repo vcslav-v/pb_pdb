@@ -82,6 +82,7 @@ def add_trello_product(card_id: str):
 
     new_product = schemas.Product(
         trello_card_id=card_id,
+        trello_link=product_card['url'],
         title=work_title,
         description=description,
         category=category,
