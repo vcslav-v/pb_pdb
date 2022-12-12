@@ -8,6 +8,7 @@ import requests
 from trello import TrelloApi
 
 from pb_pdb import db_tools, schemas
+from loguru import logger
 
 TRELLO_AUTH_KEY = os.environ.get(
     'TRELLO_AUTH_KEY',
@@ -180,7 +181,11 @@ def change_card_id_to_url(product: schemas.ProductInPage, trello: TrelloApi) -> 
     trello_card = trello.cards.get(new_product.trello_link)
     new_product.trello_link = trello_card['url']
     for child in product.children:
-        new_product.children.append(change_card_id_to_url(child, trello))
+        try:
+            new_product.children.append(change_card_id_to_url(child, trello))
+        except:
+            logger.error(f'wrong trello id {child.trello_link}')
+            continue
     return new_product
 
 
@@ -189,5 +194,9 @@ def get_links(raw_products: schemas.ProductPage) -> schemas.ProductPage:
     trello = TrelloApi(TRELLO_APP_KEY)
     trello.set_token(TRELLO_AUTH_KEY)
     for raw_product in raw_products.products:
-        result.products.append(change_card_id_to_url(raw_product, trello))
+        try:
+            result.products.append(change_card_id_to_url(raw_product, trello))
+        except:
+            logger.error(f'wrong trello id {raw_product.trello_link}')
+            continue
     return result
