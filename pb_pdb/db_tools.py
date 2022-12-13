@@ -31,6 +31,7 @@ def add_product(product: schemas.Product, designer: schemas.Employee) -> str:
         ).first()
         if not db_product:
             db_product = models.Product(trello_card_id=product.trello_card_id)
+            db_product.start_date = datetime.utcnow().date()
             session.add(db_product)
         if db_product.category != category:
             category.number_products_created += 1
@@ -120,6 +121,7 @@ def publish_product(card_id: str, links: dict):
             db_links.etsy = links.get('Etsy link')
         
         db_product.market_place_links = db_links
+        db_product.end_date = datetime.utcnow().date()
         db_product.done = True
         session.commit()
 
