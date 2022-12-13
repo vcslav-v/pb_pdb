@@ -1,6 +1,7 @@
 """Pydantic's models."""
 from pydantic import BaseModel
 from typing import Optional
+from datetime import date
 
 
 class Product(BaseModel):
@@ -34,6 +35,8 @@ class ProductInPage(BaseModel):
     dropbox_link: str
     children: list['ProductInPage'] = []
     is_done: bool
+    start_date: date
+    end_date: Optional[date]
 
 class ProductPage(BaseModel):
     products: list[ProductInPage] = []

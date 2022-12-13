@@ -114,7 +114,10 @@ def get_products() -> schemas.ProductPage:
                 trello_link = db_product.trello_link,
                 dropbox_link = db_product.dropbox_share_url,
                 is_done = db_product.done,
+                start_date=db_product.start_date,
             ))
+            if db_product.end_date:
+                result.products[-1].end_date = db_product.end_date
             db_products_children = session.query(models.Product).filter_by(parent_id=db_product.id).all()
             for child in db_products_children:
                 result.products[-1].children.append(schemas.ProductInPage(
@@ -128,7 +131,10 @@ def get_products() -> schemas.ProductPage:
                     trello_link = child.trello_link,
                     dropbox_link = child.dropbox_share_url,
                     is_done = child.done,
+                    start_date=db_product.start_date,
                 ))
+                if child.end_date:
+                    result.products[-1].children[-1].end_date = child.end_date
     return result
 
 def get_products_done() -> list[str]:
