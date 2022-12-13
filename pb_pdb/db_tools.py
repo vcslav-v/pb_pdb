@@ -40,6 +40,7 @@ def add_product(product: schemas.Product, designer: schemas.Employee) -> str:
         db_product.description = product.description
         db_product.designer = db_designer
         db_product.category = category
+        db_product.trello_link = product.trello_link
 
         if product.parrent_id:
             db_parrent = session.query(models.Product).filter_by(
