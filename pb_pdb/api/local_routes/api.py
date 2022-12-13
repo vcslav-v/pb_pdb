@@ -65,3 +65,10 @@ def make_final_text(card_id: str):
 def get_products() -> schemas.ProductPage:
     produts = db_tools.get_products()
     return produts
+
+@router.get('/make_ttl')
+@logger.catch
+def make_ttl():
+    produts = db_tools.get_products_done()
+    for produt in produts:
+        trello_tools.make_final_text(produt)

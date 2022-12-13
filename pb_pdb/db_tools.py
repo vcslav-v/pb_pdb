@@ -129,3 +129,11 @@ def get_products() -> schemas.ProductPage:
                         is_done = child.done,
                     ))
     return result
+
+def get_products_done() -> list[str]:
+    with SessionLocal() as session:
+        db_products = session.query(models.Product).filter_by(done=True).all()
+        resutl = []
+        for db_product in db_products:
+            resutl.append(db_product.trello_card_id)
+    return resutl
