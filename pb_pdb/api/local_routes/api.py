@@ -70,5 +70,6 @@ def get_products() -> schemas.ProductPage:
 @logger.catch
 def make_ttl():
     produts = db_tools.get_products_done()
+    logger.debug(produts)
     for produt in produts:
         trello_tools.make_final_text(produt)
