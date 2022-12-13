@@ -115,20 +115,20 @@ def get_products() -> schemas.ProductPage:
                 dropbox_link = db_product.dropbox_share_url,
                 is_done = db_product.done,
             ))
-            if db_product.children:
-                for child in db_product.children:
-                    result.products[-1].children.append(schemas.ProductInPage(
-                        ident = child.readable_uid,
-                        title = child.title if child.title else child.work_title,
-                        short_description = child.description[:20] if child.description else '',
-                        designer_name = child.designer.full_name,
-                        designer_id = child.designer.id,
-                        category = child.category.name,
-                        category_id = child.category.id,
-                        trello_link = child.trello_link,
-                        dropbox_link = child.dropbox_share_url,
-                        is_done = child.done,
-                    ))
+            db_products_children = session.query(models.Product).filter_by(parent_id=db_product.id).all()
+            for child in db_products_children:
+                result.products[-1].children.append(schemas.ProductInPage(
+                    ident = child.readable_uid,
+                    title = child.title if child.title else child.work_title,
+                    short_description = child.description[:20] if child.description else '',
+                    designer_name = child.designer.full_name,
+                    designer_id = child.designer.id,
+                    category = child.category.name,
+                    category_id = child.category.id,
+                    trello_link = child.trello_link,
+                    dropbox_link = child.dropbox_share_url,
+                    is_done = child.done,
+                ))
     return result
 
 def get_products_done() -> list[str]:
