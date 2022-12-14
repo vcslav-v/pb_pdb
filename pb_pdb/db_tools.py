@@ -157,3 +157,16 @@ def get_products_done() -> list[str]:
         for db_product in db_products:
             resutl.append(db_product.trello_card_id)
     return resutl
+
+def get_filters(products: schemas.ProductPage) -> schemas.ProductPage:
+    page = products.copy()
+    with SessionLocal() as session:
+        db_employees = session.query(models.Employee).all()
+        for db_employee in db_employees:
+            page.designers.append(
+                schemas.Designer(
+                    ident=db_employee.id,
+                    name=db_employee.full_name,
+                )
+            )
+        

@@ -63,5 +63,6 @@ def make_final_text(card_id: str):
 @router.get('/products/{page}')
 @logger.catch
 def get_products(page: int = 1) -> schemas.ProductPage:
-    produts = db_tools.get_products(page)
-    return produts
+    products = db_tools.get_products(page)
+    page = db_tools.get_filters(products)
+    return page
