@@ -44,6 +44,11 @@ class Designer(BaseModel):
     name: str
 
 
+class Category(BaseModel):
+    ident: int
+    name: str
+
+
 class ProductPage(BaseModel):
     products: list[ProductInPage] = []
     page: int = 1
@@ -52,6 +57,7 @@ class ProductPage(BaseModel):
 
 class ProductPageData(BaseModel):
     designers: list[Designer] = []
+    category: list[Category] = []
 
 
 class FilterPage(BaseModel):
