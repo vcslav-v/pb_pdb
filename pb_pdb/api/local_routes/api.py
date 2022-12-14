@@ -60,8 +60,8 @@ def make_final_text(card_id: str):
     trello_tools.publish(card_id)
 
 
-@router.get('/products')
+@router.get('/products/{page}')
 @logger.catch
-def get_products() -> schemas.ProductPage:
-    produts = db_tools.get_products()
+def get_products(page: int = 1) -> schemas.ProductPage:
+    produts = db_tools.get_products(page)
     return produts
