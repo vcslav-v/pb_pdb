@@ -158,9 +158,9 @@ def get_products_done() -> list[str]:
             resutl.append(db_product.trello_card_id)
     return resutl
 
-def get_filters(products: schemas.ProductPage) -> schemas.ProductPage:
-    page = products.copy()
+def get_common_data() -> schemas.ProductPageData:
     with SessionLocal() as session:
+        page = schemas.ProductPageData()
         db_employees = session.query(models.Employee).all()
         for db_employee in db_employees:
             page.designers.append(

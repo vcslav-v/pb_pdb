@@ -64,5 +64,10 @@ def make_final_text(card_id: str):
 @logger.catch
 def get_products(page: int = 1) -> schemas.ProductPage:
     products = db_tools.get_products(page)
-    page = db_tools.get_filters(products)
+    return products
+
+@router.get('/common_data')
+@logger.catch
+def get_common_data() -> schemas.ProductPageData:
+    page = db_tools.get_common_data()
     return page

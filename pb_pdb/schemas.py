@@ -48,4 +48,7 @@ class ProductPage(BaseModel):
     products: list[ProductInPage] = []
     page: int = 1
     number_pages: int = 1
+
+
+class ProductPageData(BaseModel):
     designers: list[Designer] = []
