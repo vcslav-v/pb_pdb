@@ -169,4 +169,5 @@ def get_filters(products: schemas.ProductPage) -> schemas.ProductPage:
                     name=db_employee.full_name,
                 )
             )
+    return page
         
