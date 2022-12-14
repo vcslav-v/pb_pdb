@@ -112,7 +112,9 @@ def get_products(page: int = 1) -> schemas.ProductPage:
             parent_id=None
         ).order_by(
             models.Product.start_date
-        ).all()
+        ).slice(
+            page_start, page_end
+        )
         for db_product in db_products:
             result.products.append(schemas.ProductInPage(
                 ident = db_product.readable_uid,
