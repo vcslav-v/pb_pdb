@@ -40,3 +40,5 @@ class ProductInPage(BaseModel):
 
 class ProductPage(BaseModel):
     products: list[ProductInPage] = []
+    page: int
+    number_pages: int

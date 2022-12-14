@@ -1,9 +1,11 @@
+from datetime import datetime
+from math import ceil
 from typing import Optional
-from urllib.parse import urlparse
 
 from pb_pdb import dropbox_tools, models, schemas
 from pb_pdb.db import SessionLocal
-from datetime import datetime
+
+PRODUCTS_ON_PAGE = 10
 
 
 def get_exist_category_from_list(labels: list[str]) -> Optional[str]:
@@ -98,10 +100,21 @@ def publish_product(card_id: str):
         session.commit()
 
 
-def get_products() -> schemas.ProductPage:
+def get_products(page: int = 1) -> schemas.ProductPage:
     result = schemas.ProductPage()
+    result.page = page
+    page_start = PRODUCTS_ON_PAGE * (page - 1)
+    page_end = PRODUCTS_ON_PAGE * page
     with SessionLocal() as session:
-        db_products = session.query(models.Product).filter_by(parent_id=None).all()
+        all_db_products = session.query(models.Product).filter_by(parent_id=None).count()
+        result.number_pages = ceil(all_db_products / PRODUCTS_ON_PAGE)
+        db_products = session.query(models.Product).filter_by(
+            parent_id=None
+        ).order_by(
+            models.Product.start_date
+        ).slice(
+            page_start, page_end
+        )
         for db_product in db_products:
             result.products.append(schemas.ProductInPage(
                 ident = db_product.readable_uid,
