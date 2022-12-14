@@ -106,15 +106,16 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
     page_start = PRODUCTS_ON_PAGE * (filter_data.page - 1)
     page_end = PRODUCTS_ON_PAGE * filter_data.page
     with SessionLocal() as session:
-        all_db_products = session.query(models.Product).filter_by(parent_id=None).count()
-        result.number_pages = ceil(all_db_products / PRODUCTS_ON_PAGE)
         filter_by_conditions = {
             'parent_id': None,
         }
         if filter_data.designer_id:
             filter_by_conditions['designer_id'] = filter_data.designer_id
+        
+        all_db_products = session.query(models.Product).filter_by(**filter_by_conditions).count()
+        result.number_pages = ceil(all_db_products / PRODUCTS_ON_PAGE)
         db_products = session.query(models.Product).filter_by(
-            **filter_by_conditions
+            
         ).order_by(
             models.Product.start_date
         ).slice(
