@@ -57,3 +57,5 @@ class ProductPageData(BaseModel):
 class FilterPage(BaseModel):
     page: int = 1
     designer_id: Optional[int]
+    end_date_start: Optional[date]
+    end_date_end: Optional[date]

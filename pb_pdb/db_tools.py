@@ -2,6 +2,8 @@ from datetime import datetime
 from math import ceil
 from typing import Optional
 
+from sqlalchemy import and_
+
 from pb_pdb import dropbox_tools, models, schemas
 from pb_pdb.db import SessionLocal
 
@@ -106,21 +108,21 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
     page_start = PRODUCTS_ON_PAGE * (filter_data.page - 1)
     page_end = PRODUCTS_ON_PAGE * filter_data.page
     with SessionLocal() as session:
-        filter_by_conditions = {
-            'parent_id': None,
-        }
+        query = session.query(models.Product).filter_by(parent_id=None)
+
         if filter_data.designer_id:
-            filter_by_conditions['designer_id'] = filter_data.designer_id
+            query = query.filter_by(designer_id = filter_data.designer_id)
+        if filter_data.end_date_start and filter_data.end_date_end:
+            query = query.filter(
+                and_(
+                    models.Product.end_date >= filter_data.end_date_start,
+                    models.Product.end_date <= filter_data.end_date_end,
+                )
+            )
         
-        all_db_products = session.query(models.Product).filter_by(**filter_by_conditions).count()
+        all_db_products = query.count()
         result.number_pages = ceil(all_db_products / PRODUCTS_ON_PAGE)
-        db_products = session.query(models.Product).filter_by(
-            **filter_by_conditions
-        ).order_by(
-            models.Product.start_date
-        ).slice(
-            page_start, page_end
-        )
+        db_products = query.slice(page_start, page_end)
         for db_product in db_products:
             result.products.append(schemas.ProductInPage(
                 ident = db_product.readable_uid,
