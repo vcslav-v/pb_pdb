@@ -115,7 +115,7 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
         all_db_products = session.query(models.Product).filter_by(**filter_by_conditions).count()
         result.number_pages = ceil(all_db_products / PRODUCTS_ON_PAGE)
         db_products = session.query(models.Product).filter_by(
-            
+            **filter_by_conditions
         ).order_by(
             models.Product.start_date
         ).slice(
