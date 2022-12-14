@@ -112,6 +112,8 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
 
         if filter_data.designer_id:
             query = query.filter_by(designer_id = filter_data.designer_id)
+        if filter_data.category_id:
+            query = query.filter_by(category_id = filter_data.category_id)
         if filter_data.end_date_start and filter_data.end_date_end:
             query = query.filter(
                 and_(
