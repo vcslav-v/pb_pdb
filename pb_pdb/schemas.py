@@ -57,7 +57,7 @@ class ProductPage(BaseModel):
 
 class ProductPageData(BaseModel):
     designers: list[Designer] = []
-    category: list[Category] = []
+    categories: list[Category] = []
 
 
 class FilterPage(BaseModel):

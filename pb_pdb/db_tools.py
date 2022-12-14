@@ -179,7 +179,7 @@ def get_common_data() -> schemas.ProductPageData:
             )
         db_categories = session.query(models.Category).filter(models.Category.products).all()
         for db_category in db_categories:
-            page.category.append(
+            page.categories.append(
                 schemas.Category(
                     ident=db_category.id,
                     name=db_category.name,
