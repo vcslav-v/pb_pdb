@@ -108,8 +108,13 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
     with SessionLocal() as session:
         all_db_products = session.query(models.Product).filter_by(parent_id=None).count()
         result.number_pages = ceil(all_db_products / PRODUCTS_ON_PAGE)
+        filter_by_conditions = {
+            'parent_id': None,
+        }
+        if filter_data.designer_id:
+            filter_by_conditions['designer_id'] = filter_data.designer_id
         db_products = session.query(models.Product).filter_by(
-            parent_id=None
+            **filter_by_conditions
         ).order_by(
             models.Product.start_date
         ).slice(
@@ -161,7 +166,7 @@ def get_products_done() -> list[str]:
 def get_common_data() -> schemas.ProductPageData:
     with SessionLocal() as session:
         page = schemas.ProductPageData()
-        db_employees = session.query(models.Employee).all()
+        db_employees = session.query(models.Employee).filter(models.Employee.products_as_designer).all()
         for db_employee in db_employees:
             page.designers.append(
                 schemas.Designer(
