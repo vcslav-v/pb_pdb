@@ -52,3 +52,8 @@ class ProductPage(BaseModel):
 
 class ProductPageData(BaseModel):
     designers: list[Designer] = []
+
+
+class FilterPage(BaseModel):
+    page: int = 1
+    designer_id: Optional[int]

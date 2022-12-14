@@ -100,11 +100,11 @@ def publish_product(card_id: str):
         session.commit()
 
 
-def get_products(page: int = 1) -> schemas.ProductPage:
+def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
     result = schemas.ProductPage()
-    result.page = page
-    page_start = PRODUCTS_ON_PAGE * (page - 1)
-    page_end = PRODUCTS_ON_PAGE * page
+    result.page = filter_data.page
+    page_start = PRODUCTS_ON_PAGE * (filter_data.page - 1)
+    page_end = PRODUCTS_ON_PAGE * filter_data.page
     with SessionLocal() as session:
         all_db_products = session.query(models.Product).filter_by(parent_id=None).count()
         result.number_pages = ceil(all_db_products / PRODUCTS_ON_PAGE)
