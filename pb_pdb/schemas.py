@@ -40,5 +40,5 @@ class ProductInPage(BaseModel):
 
 class ProductPage(BaseModel):
     products: list[ProductInPage] = []
-    page: int
-    number_pages: int
+    page: int = 1
+    number_pages: int = 1
