@@ -117,8 +117,8 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
         if filter_data.end_design_date_start and filter_data.end_design_date_end:
             query = query.filter(
                 and_(
-                    models.Product.end_date >= filter_data.end_design_date_start,
-                    models.Product.end_date <= filter_data.end_design_date_end,
+                    models.Product.end_production_date >= filter_data.end_design_date_start,
+                    models.Product.end_production_date <= filter_data.end_design_date_end,
                 )
             )
         
