@@ -160,6 +160,8 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
                 ))
                 if child.end_date:
                     result.products[-1].children[-1].end_date = child.end_date
+                if child.end_production_date:
+                    result.products[-1].children[-1].end_designer_date = child.end_production_date
     return result
 
 def get_products_done() -> list[str]:
