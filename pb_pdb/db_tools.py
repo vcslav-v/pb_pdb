@@ -189,3 +189,11 @@ def get_common_data() -> schemas.ProductPageData:
             )
     return page
         
+
+def production_end(card_id: str):
+    with SessionLocal() as session:
+        db_product = session.query(models.Product).filter_by(
+            trello_card_id=card_id
+        ).first()
+        db_product.end_production_date = datetime.utcnow().date()
+        session.commit()

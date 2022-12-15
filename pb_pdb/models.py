@@ -21,6 +21,7 @@ class Product(Base):
     cover = Column(LargeBinary)
     start_date = Column(Date)
     end_date = Column(Date)
+    end_production_date = Column(Date)
     description = Column(Text)
     work_directory = Column(Text)
     done = Column(Boolean, default=False)
