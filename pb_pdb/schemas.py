@@ -65,5 +65,5 @@ class FilterPage(BaseModel):
     page: int = 1
     designer_id: Optional[int]
     category_id: Optional[int]
-    end_date_start: Optional[date]
-    end_date_end: Optional[date]
+    end_design_date_start: Optional[date]
+    end_design_date_end: Optional[date]
