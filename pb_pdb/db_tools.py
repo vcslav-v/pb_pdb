@@ -141,6 +141,8 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
             ))
             if db_product.end_date:
                 result.products[-1].end_date = db_product.end_date
+            if db_product.end_production_date:
+                result.products[-1].end_designer_date = db_product.end_production_date
             db_products_children = session.query(models.Product).filter_by(parent_id=db_product.id).all()
             for child in db_products_children:
                 result.products[-1].children.append(schemas.ProductInPage(
@@ -187,8 +189,7 @@ def get_common_data() -> schemas.ProductPageData:
                     name=db_category.name,
                 )
             )
-    return page
-        
+    return page 
 
 def production_end(card_id: str):
     with SessionLocal() as session:

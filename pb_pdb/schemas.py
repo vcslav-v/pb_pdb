@@ -37,6 +37,7 @@ class ProductInPage(BaseModel):
     is_done: bool
     start_date: date
     end_date: Optional[date]
+    end_designer_date: Optional[date]
 
 
 class Designer(BaseModel):
