@@ -123,6 +123,7 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
             )
         
         all_db_products = query.count()
+        result.number_products = all_db_products
         result.number_pages = ceil(all_db_products / PRODUCTS_ON_PAGE)
         db_products = query.slice(page_start, page_end)
         for db_product in db_products:
