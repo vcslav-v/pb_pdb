@@ -13,10 +13,9 @@ def resize_to_x1(x2_url: str, new_name: str, prefix: str):
     with io.BytesIO(resp.content) as img_file:
         img = Image.open(img_file)
         resized_img = img.resize((img.size[0]//2, img.size[1]//2))
-        temp_name = f'temp-{new_name}-{int(datetime.now().timestamp())}.jpg'
-        resized_img.convert('RGB').save(temp_name)
-        url = space_tools.save_to_space(temp_name, prefix, new_name)
-        os.remove(temp_name)
+        with io.BytesIO() as buffer:
+            resized_img.convert('RGB').save(buffer, format='JPEG')
+            url = space_tools.save_to_space(buffer.getvalue(), prefix, new_name)
         return url
 
 def prepare_imgs(product: schemas.UploadProduct, product_files: schemas.ProductFiles) -> schemas.ProductFiles:

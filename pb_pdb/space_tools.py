@@ -54,7 +54,7 @@ def get_file_urls(product: schemas.UploadFreebie) -> schemas.ProductFiles:
     client.close()
     return result
 
-def save_to_space(filename: str, prefix: str, new_name: str):
+def save_to_space(data: str, prefix: str, new_name: str):
     do_session = s3_session.Session()
     client = do_session.client(
         's3',
@@ -63,6 +63,13 @@ def save_to_space(filename: str, prefix: str, new_name: str):
         aws_access_key_id=do_app.DO_SPACE_KEY,
         aws_secret_access_key=do_app.DO_SPACE_SECRET
     )
-    key = f'/temp/{prefix}/{new_name}'
-    client.upload_file(filename, do_app.DO_SPACE_BUCKET, key)
+    key = f'temp/{prefix}/{new_name}'
+    client.put_object(
+        Bucket=do_app.DO_SPACE_BUCKET,
+        Body=data,
+        Key=key,
+        ACL='public-read',
+        StorageClass='REDUCED_REDUNDANCY',
+        ContentType='application/octet-stream',
+    )
     return key
