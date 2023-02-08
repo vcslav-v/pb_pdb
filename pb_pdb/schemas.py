@@ -1,5 +1,5 @@
 """Pydantic's models."""
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import Optional
 from datetime import date
 
@@ -87,9 +87,16 @@ class UploadProduct(BaseModel):
 
 class UploadFreebie(UploadProduct):
     download_by_email: bool = False
-    #TODO validation
-    meta_title: str = 'meta_title'
-    meta_description: str = 'meta_description'
+    meta_title: Optional[str]
+    meta_description: Optional[str]
+
+    @validator('meta_title', pre=True, always=True)
+    def template_meta_title(cls, v, values, **kwargs):
+        return f'Download {values["title"]}'
+    
+    @validator('meta_description', pre=True, always=True)
+    def template_meta_description(cls, v, values, **kwargs):
+        return values['excerpt']
 
 
 class ProductFiles(BaseModel):
