@@ -107,4 +107,4 @@ class ProductFiles(BaseModel):
     gallery_x2_urls: list[str]
     thumbnail_url: Optional[str]
     thumbnail_x2_url: str
-    push_url: str
+    push_url: Optional[str]

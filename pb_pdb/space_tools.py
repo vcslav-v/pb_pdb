@@ -39,17 +39,15 @@ def get_file_urls(product: schemas.UploadFreebie) -> schemas.ProductFiles:
     main_img = get_save_s3_obj(s3_objs, 'main_x2', product.prefix)
     thumbnail_img = get_save_s3_obj(s3_objs, 'thumbnail_x2', product.prefix)
     product_file = get_save_s3_obj(s3_objs, product.product_file_name, product.prefix)
-
-    main_img_x2_url=get_s3_link(client, main_img)
-
     
     result = schemas.ProductFiles(
         product_url=get_s3_link(client, product_file),
         main_img_x2_url=get_s3_link(client, main_img),
         gallery_x2_urls=[get_s3_link(client, gallery_img) for gallery_img in gallery],
         thumbnail_x2_url=get_s3_link(client, thumbnail_img),
-        push_url=get_s3_link(client, img_for_push)
     )
+    if img_for_push:
+        result.push_url=get_s3_link(client, img_for_push)
     
     client.close()
     return result
