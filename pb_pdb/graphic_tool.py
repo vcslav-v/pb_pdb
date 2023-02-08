@@ -12,12 +12,12 @@ def resize_to_x1(x2_url: str, new_name: str, prefix: str):
     resp = requests.get(x2_url)
     with io.BytesIO(resp.content) as img_file:
         img = Image.open(img_file)
-    resized_img = img.resize((img.size[0]//2, img.size[1]//2))
-    temp_name = f'temp-{new_name}-{int(datetime.now().timestamp())}.jpg'
-    resized_img.save(temp_name)
-    url = space_tools.save_to_space(temp_name, prefix, new_name)
-    os.remove(temp_name)
-    return url
+        resized_img = img.resize((img.size[0]//2, img.size[1]//2))
+        temp_name = f'temp-{new_name}-{int(datetime.now().timestamp())}.jpg'
+        resized_img.save(temp_name)
+        url = space_tools.save_to_space(temp_name, prefix, new_name)
+        os.remove(temp_name)
+        return url
 
 def prepare_imgs(product: schemas.UploadProduct, product_files: schemas.ProductFiles) -> schemas.ProductFiles:
     new_product_files = product_files.copy()

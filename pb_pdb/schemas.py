@@ -85,12 +85,6 @@ class UploadProduct(BaseModel):
     formats: list[str] = []
 
 
-class UploadProductPrepaired(UploadProduct):
-    thumbnail_url: str
-    thumbnail_x2_url: str
-    push_url: str
-
-
 class UploadFreebie(UploadProduct):
     download_by_email: bool = False
     #TODO validation
