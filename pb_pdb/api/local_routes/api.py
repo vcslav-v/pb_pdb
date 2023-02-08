@@ -1,10 +1,11 @@
 import os
 import secrets
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from loguru import logger
 from pb_pdb import schemas, trello_tools, db_tools
+from pb_pdb.api import service
 
 router = APIRouter()
 security = HTTPBasic()
@@ -77,3 +78,9 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
 def get_common_data() -> schemas.ProductPageData:
     page = db_tools.get_common_data()
     return page
+
+
+@router.post('/pb_freebie_upload')
+@logger.catch
+def pb_freebie_upload(freebie_product: schemas.UploadFreebie, background_tasks: BackgroundTasks):
+    background_tasks.add_task(service.upload_product, freebie_product, 'pb', 'freebie')

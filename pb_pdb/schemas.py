@@ -68,3 +68,42 @@ class FilterPage(BaseModel):
     category_id: Optional[int]
     end_design_date_start: Optional[date]
     end_design_date_end: Optional[date]
+
+
+class UploadProduct(BaseModel):
+    prefix: str
+    product_file_name: str
+    title: str
+    slug: str
+    excerpt: str
+    description: str
+    size: str
+    guest_author: Optional[str]
+    guest_author_link: Optional[str]
+    date_upload: date
+    categories: list[str] = []
+    formats: list[str] = []
+
+
+class UploadProductPrepaired(UploadProduct):
+    thumbnail_url: str
+    thumbnail_x2_url: str
+    push_url: str
+
+
+class UploadFreebie(UploadProduct):
+    download_by_email: bool = False
+    #TODO validation
+    meta_title: str = 'meta_title'
+    meta_description: str = 'meta_description'
+
+
+class ProductFiles(BaseModel):
+    product_url: str
+    main_img_url: Optional[str]
+    main_img_x2_url: str
+    gallery_urls: Optional[str]
+    gallery_x2_urls: list[str]
+    thumbnail_url: Optional[str]
+    thumbnail_x2_url: str
+    push_url: str
