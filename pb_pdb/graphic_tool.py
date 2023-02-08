@@ -14,6 +14,7 @@ def resize_to_x1(x2_url: str, new_name: str, prefix: str):
         img = Image.open(img_file)
         resized_img = img.resize((img.size[0]//2, img.size[1]//2))
         temp_name = f'temp-{new_name}-{int(datetime.now().timestamp())}.jpg'
+        resized_img.convert('RGB')
         resized_img.save(temp_name)
         url = space_tools.save_to_space(temp_name, prefix, new_name)
         os.remove(temp_name)
