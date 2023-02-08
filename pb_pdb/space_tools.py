@@ -72,4 +72,4 @@ def save_to_space(data: str, prefix: str, new_name: str):
         StorageClass='REDUCED_REDUNDANCY',
         ContentType='application/octet-stream',
     )
-    return key
+    return get_s3_link(client, key)
