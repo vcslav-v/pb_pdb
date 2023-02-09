@@ -10,7 +10,7 @@ from pb_pdb.api import service
 router = APIRouter()
 security = HTTPBasic()
 
-username = os.environ.get('API_USERNAME') or 'root'
+username = os.environ.get('API_USERNAME') or 'api'
 password = os.environ.get('API_PASSWORD') or 'pass'
 
 

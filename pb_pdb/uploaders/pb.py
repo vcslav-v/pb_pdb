@@ -64,7 +64,7 @@ def freebie_main_tab(driver: Remote, product: schemas.UploadFreebie, product_fil
     input_slug.send_keys(product.slug)
 
     input_date = driver.find_element(By.XPATH, '//input[@name="Date"]/../input[@type="text"]')
-    input_date.send_keys(f'{product.date_upload.day}-{product.date_upload.month}-{product.date_upload.year}')
+    input_date.send_keys(f'{product.date_upload.year}-{product.date_upload.month}-{product.date_upload.day}')
 
     status_select = driver.find_element(By.ID, 'status')
     select_status_element = Select(status_select)
