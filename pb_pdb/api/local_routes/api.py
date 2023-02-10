@@ -82,5 +82,11 @@ def get_common_data() -> schemas.ProductPageData:
 
 @router.post('/pb_freebie_upload')
 @logger.catch
-def pb_freebie_upload(freebie_product: schemas.UploadFreebie, background_tasks: BackgroundTasks):
+def pb_freebie_upload(freebie_product: schemas.UploadFreebie, background_tasks: BackgroundTasks, _: str = Depends(get_current_username)):
     background_tasks.add_task(service.upload_product, freebie_product, 'pb', 'freebie')
+
+
+@router.post('/get_status_upload')
+@logger.catch
+def get_status_upload(prefix, _: str = Depends(get_current_username)):
+    return db_tools.get_status(prefix)

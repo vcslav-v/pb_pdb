@@ -201,3 +201,25 @@ def production_end(card_id: str):
         ).first()
         db_product.end_production_date = datetime.utcnow().date()
         session.commit()
+
+def set_status(prefix: str, status: str):
+    with SessionLocal() as session:
+        db_upload_status = session.query(models.UploadStatus).filter_by(
+            prefix=prefix
+        ).first()
+        if not db_upload_status:
+            db_upload_status = models.UploadStatus(
+                prefix=prefix,
+            )
+            session.add(db_upload_status)
+        db_upload_status.status = status
+        session.commit()
+
+def get_status(prefix: str):
+    with SessionLocal() as session:
+        db_upload_status = session.query(models.UploadStatus).filter_by(
+            prefix=prefix
+        ).first()
+        if not db_upload_status:
+            return
+        return db_upload_status.status

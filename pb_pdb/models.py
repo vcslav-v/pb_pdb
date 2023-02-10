@@ -89,3 +89,13 @@ class MarketPlaceLink(Base):
 
     product_id = Column(Integer, ForeignKey('products.id'))
     product = relationship('Product', back_populates='market_place_links')
+
+
+class UploadStatus(Base):
+    '''Market Place Link.'''
+
+    __tablename__ = 'upload_status'
+
+    id = Column(Integer, primary_key=True)
+    prefix = Column(Text, unique=True)
+    status = Column(Text)
