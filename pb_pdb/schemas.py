@@ -99,6 +99,19 @@ class UploadFreebie(UploadProduct):
         return values['excerpt']
 
 
+class UploadPlus(UploadProduct):
+    meta_title: Optional[str]
+    meta_description: Optional[str]
+
+    @validator('meta_title', pre=True, always=True)
+    def template_meta_title(cls, v, values, **kwargs):
+        return f'Download {values["title"]}'
+    
+    @validator('meta_description', pre=True, always=True)
+    def template_meta_description(cls, v, values, **kwargs):
+        return values['excerpt']
+
+
 class ProductFiles(BaseModel):
     product_url: str
     product_s3_url: Optional[str]
