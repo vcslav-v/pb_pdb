@@ -19,6 +19,7 @@ PB_UPL_API_PASS = os.environ.get('PB_UPL_API_PASS', '')
 PB_UPL_API_URL = os.environ.get('PB_UPL_API_URL', '')
 ADMIN_PB_URL = os.environ.get('ADMIN_PB_URL', '')
 PB_NEW_FREEBIE_URL = os.environ.get('PB_NEW_FREEBIE_URL', '')
+PB_NEW_PLUS_URL = os.environ.get('PB_NEW_PLUS_URL', '')
 
 
 def make_link_product_file(product_url: str, product_type: str):
