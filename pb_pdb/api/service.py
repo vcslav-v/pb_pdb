@@ -6,5 +6,5 @@ def upload_product(product: schemas.UploadProduct, market: str, pr_type: str = N
         try:
             uploader.to_pb_freebie(product)
         except Exception:
-            db_tools.set_status(product.prefix, 'Error')
+            db_tools.set_status(product.prefix, 'PB_Error')
     db_tools.set_status(product.prefix, 'Done')

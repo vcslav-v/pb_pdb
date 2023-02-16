@@ -3,7 +3,8 @@ from time import sleep
 from urllib.parse import unquote, urlparse
 
 from loguru import logger
-from selenium import webdriver
+import requests
+import json
 from selenium.webdriver import Remote
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
@@ -13,8 +14,29 @@ from pb_pdb import schemas
 
 LOGIN_PB = os.environ.get('LOGIN_PB', '')
 PASS_PB = os.environ.get('PASS_PB', '')
+PB_UPL_API_LOGIN = os.environ.get('PB_UPL_API_LOGIN', '')
+PB_UPL_API_PASS = os.environ.get('PB_UPL_API_PASS', '')
+PB_UPL_API_URL = os.environ.get('PB_UPL_API_URL', '')
 ADMIN_PB_URL = os.environ.get('ADMIN_PB_URL', '')
 PB_NEW_FREEBIE_URL = os.environ.get('PB_NEW_FREEBIE_URL', '')
+
+
+def make_link_product_file(product_url: str, product_type: str):
+    with requests.sessions.Session() as session:
+        product = product_url.split('?')[0]
+        data = {
+            'upload': product,
+            'type': product_type,
+            'load_to_s3': False if product_type == 'freebie' else True,
+            'callback': ''
+    }
+        session.auth = (PB_UPL_API_LOGIN, PB_UPL_API_PASS)
+        resp = session.post(PB_UPL_API_URL, json=data)
+        resp.raise_for_status()
+        result = json.loads(resp.content)
+        if not result['success']:
+            raise ValueError("Can't upload to pb")
+        return (result['local_link'], result['s3_link'] if result['s3_link'] else None)
 
 
 def send_source_html_to_wysiwyg(driver: Remote, xpath_view: str, source_html: str):
@@ -97,11 +119,14 @@ def freebie_main_tab(driver: Remote, product: schemas.UploadFreebie, product_fil
 
 def freebie_files_tab(driver: Remote, product_files: schemas.ProductFiles):
     driver.get(f'{PB_NEW_FREEBIE_URL}#files')
-
-    input_s3 = WebDriverWait(driver, timeout=20).until(
-        lambda d: d.find_element(By.ID, 's3_path')
+    input_local = WebDriverWait(driver, timeout=20).until(
+        lambda d: d.find_element(By.ID, 'vps_path')
     )
-    input_s3.send_keys(product_files.product_url)
+    input_local.send_keys(product_files.product_url)
+
+    if product_files.product_s3_url:
+        input_s3 = driver.find_element(By.ID, 's3_path')
+        input_s3.send_keys(product_files.product_url)
 
 def freebie_images_tab(driver: Remote, product_files: schemas.ProductFiles):
     driver.get(f'{PB_NEW_FREEBIE_URL}#single-page-(images)')
@@ -179,8 +204,8 @@ def new_freebie(driver: Remote, product: schemas.UploadFreebie, product_files: s
     driver.get(PB_NEW_FREEBIE_URL)
     logger.debug('main freebie page')
     freebie_main_tab(driver, product, product_files)
-    # logger.debug('files freebie page')
-    # freebie_files_tab(driver, product_files)
+    logger.debug('files freebie page')
+    freebie_files_tab(driver, product_files)
     logger.debug('images freebie page')
     freebie_images_tab(driver, product_files)
     logger.debug('retina images freebie page')

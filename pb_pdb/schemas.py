@@ -101,6 +101,7 @@ class UploadFreebie(UploadProduct):
 
 class ProductFiles(BaseModel):
     product_url: str
+    product_s3_url: Optional[str]
     main_img_url: Optional[str]
     main_img_x2_url: str
     gallery_urls: Optional[str]
