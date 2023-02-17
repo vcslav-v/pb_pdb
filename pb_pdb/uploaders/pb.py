@@ -210,11 +210,11 @@ def prem_images_tab(driver, product_files: schemas.ProductFiles, base_url: str):
 
     input_premium_slider = driver.find_element(By.ID, '__media__premium_slider')
     for gallery_img in product_files.gallery_urls:
-        input_premium_slider.send_keys(download_to_selenium(driver, gallery_img))
+        input_premium_slider.send_keys(download_to_selenium(driver, gallery_img).replace('|', '_'))
     
     input_premium_slider_x2 = driver.find_element(By.ID, '__media__premium_slider_retina')
     for gallery_img in product_files.gallery_x2_urls:
-        input_premium_slider_x2.send_keys(download_to_selenium(driver, gallery_img))
+        input_premium_slider_x2.send_keys(download_to_selenium(driver, gallery_img).replace('|', '_'))
 
 def freebie_plus_retina_images_tab(driver: Remote, product_files: schemas.ProductFiles, base_url: str):
     driver.get(f'{base_url}#single-page-(images-retina)')
@@ -252,7 +252,7 @@ def prem_single_page(driver, product: schemas.UploadPrem, base_url: str):
     )
 
 def plus_guest_authtor(driver: Remote, product: schemas.UploadFreebie):
-    driver.get(f'{PB_NEW_PLUS_URL}#single-page-(text)')
+    driver.get(f'{PB_NEW_PLUS_URL}#single-page-text')
     input_author_name = WebDriverWait(driver, timeout=20).until(
         lambda d: d.find_element(By.ID, 'author_name')
     )

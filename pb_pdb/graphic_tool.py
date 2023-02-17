@@ -40,7 +40,7 @@ def prepare_imgs(product: schemas.UploadProduct, product_files: schemas.ProductF
     new_product_files.main_img_url = resize_to_x1(product_files.main_img_x2_url, 'main.jpg', product.prefix)
     new_product_files.thumbnail_url = resize_to_x1(product_files.thumbnail_x2_url, 'thumbnail.jpg', product.prefix)
     if product_files.prem_thumbnail_x2_url:
-        product_files.prem_thumbnail_url = resize_to_x1(product_files.prem_thumbnail_x2_url, 'prem_thumbnail.jpg', product.prefix)
+        new_product_files.prem_thumbnail_url = resize_to_x1(product_files.prem_thumbnail_x2_url, 'prem_thumbnail.jpg', product.prefix)
     new_product_files.gallery_urls = []
     for i, gallery_x2_url in enumerate(product_files.gallery_x2_urls):
         new_product_files.gallery_urls.append(resize_to_x1(gallery_x2_url, f'image_for_gallery|{i+1}.jpg', product.prefix))
