@@ -46,7 +46,7 @@ def to_pb_prem(product: schemas.UploadPrem):
     db_tools.set_status(product.prefix, 'Making product urls for upload')
     product_files.product_url, product_files.product_s3_url = uploaders.pb.make_link_product_file(
         product_files.product_url,
-        'plus'
+        'premium'
     )
     db_tools.set_status(product.prefix, 'Image preparing')
     product_files = graphic_tool.prepare_imgs(product, product_files)
