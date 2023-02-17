@@ -118,6 +118,8 @@ class UploadPrem(UploadProduct):
     sale_standart_price: Optional[int]
     sale_extended_price: Optional[int]
     compatibilities: list[str] = []
+    meta_title: Optional[str]
+    meta_description: Optional[str]
 
     @validator('meta_title', pre=True, always=True)
     def template_meta_title(cls, v, values, **kwargs):
