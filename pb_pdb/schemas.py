@@ -1,7 +1,7 @@
 """Pydantic's models."""
 from pydantic import BaseModel, validator
 from typing import Optional
-from datetime import date
+from datetime import date, datetime
 
 
 class Product(BaseModel):
@@ -80,7 +80,7 @@ class UploadProduct(BaseModel):
     size: str
     guest_author: Optional[str]
     guest_author_link: Optional[str]
-    date_upload: date
+    date_upload: datetime
     categories: list[str] = []
     formats: list[str] = []
 
@@ -112,6 +112,22 @@ class UploadPlus(UploadProduct):
         return values['excerpt']
 
 
+class UploadPrem(UploadProduct):
+    standart_price: int
+    extended_price: int
+    sale_standart_price: Optional[int]
+    sale_extended_price: Optional[int]
+    compatibilities: list[str] = []
+
+    @validator('meta_title', pre=True, always=True)
+    def template_meta_title(cls, v, values, **kwargs):
+        return f'Download {values["title"]}'
+    
+    @validator('meta_description', pre=True, always=True)
+    def template_meta_description(cls, v, values, **kwargs):
+        return values['excerpt']
+
+
 class ProductFiles(BaseModel):
     product_url: str
     product_s3_url: Optional[str]
@@ -122,3 +138,5 @@ class ProductFiles(BaseModel):
     thumbnail_url: Optional[str]
     thumbnail_x2_url: str
     push_url: Optional[str]
+    prem_thumbnail_url: Optional[str]
+    prem_thumbnail_x2_url: Optional[str]

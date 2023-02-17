@@ -90,6 +90,11 @@ def pb_freebie_upload(freebie_product: schemas.UploadFreebie, background_tasks: 
 def pb_plus_upload(plus_product: schemas.UploadPlus, background_tasks: BackgroundTasks, _: str = Depends(get_current_username)):
     background_tasks.add_task(service.upload_product, plus_product, 'pb', 'plus')
 
+@router.post('/pb_prem_upload')
+@logger.catch
+def pb_prem_upload(plus_product: schemas.UploadPrem, background_tasks: BackgroundTasks, _: str = Depends(get_current_username)):
+    background_tasks.add_task(service.upload_product, plus_product, 'pb', 'prem')
+
 
 
 @router.post('/get_status_upload')

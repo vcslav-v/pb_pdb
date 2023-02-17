@@ -24,7 +24,7 @@ def get_s3_link(client, key):
         ExpiresIn=3000
     )
 
-def get_file_urls(product: schemas.UploadFreebie) -> schemas.ProductFiles:
+def get_file_urls(product) -> schemas.ProductFiles:
     do_session = s3_session.Session()
     client = do_session.client(
         's3',
@@ -38,6 +38,8 @@ def get_file_urls(product: schemas.UploadFreebie) -> schemas.ProductFiles:
     gallery = get_save_s3_obj(s3_objs, 'image_for_gallery_x2', product.prefix, multitude=True)
     main_img = get_save_s3_obj(s3_objs, 'main_x2', product.prefix)
     thumbnail_img = get_save_s3_obj(s3_objs, 'thumbnail_x2', product.prefix)
+    if isinstance(product, schemas.UploadPrem):
+        prem_thumbnail_img = get_save_s3_obj(s3_objs, 'prem_thumbnail_x2', product.prefix)
     product_file = get_save_s3_obj(s3_objs, product.product_file_name, product.prefix)
     
     result = schemas.ProductFiles(
@@ -47,7 +49,9 @@ def get_file_urls(product: schemas.UploadFreebie) -> schemas.ProductFiles:
         thumbnail_x2_url=get_s3_link(client, thumbnail_img),
     )
     if img_for_push:
-        result.push_url=get_s3_link(client, img_for_push)
+        result.push_url = get_s3_link(client, img_for_push)
+    if isinstance(product, schemas.UploadPrem):
+        result.prem_thumbnail_x2_url = get_s3_link(client, prem_thumbnail_img)
     
     client.close()
     return result
