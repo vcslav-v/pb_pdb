@@ -1,7 +1,9 @@
 from pb_pdb import (browser, db_tools, graphic_tool, schemas, space_tools,
                     uploaders, )
+from loguru import logger
 
 
+@logger.catch
 def to_pb_freebie(product: schemas.UploadFreebie):
     db_tools.set_status(product.prefix, 'Making img urls for upload')
     product_files = space_tools.get_file_urls(product)
@@ -19,6 +21,7 @@ def to_pb_freebie(product: schemas.UploadFreebie):
     db_tools.set_status(product.prefix, 'Uploaded to PB')
 
 
+@logger.catch
 def to_pb_plus(product: schemas.UploadPlus):
     db_tools.set_status(product.prefix, 'Making img urls for upload')
     product_files = space_tools.get_file_urls(product)
@@ -36,6 +39,7 @@ def to_pb_plus(product: schemas.UploadPlus):
     db_tools.set_status(product.prefix, 'Uploaded to PB')
 
 
+@logger.catch
 def to_pb_prem(product: schemas.UploadPrem):
     db_tools.set_status(product.prefix, 'Making img urls for upload')
     product_files = space_tools.get_file_urls(product)
