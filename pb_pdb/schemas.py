@@ -105,7 +105,7 @@ class UploadPlus(UploadProduct):
 
     @validator('meta_title', pre=True, always=True)
     def template_meta_title(cls, v, values, **kwargs):
-        return f'Download {values["title"]}'
+        return values["title"]
     
     @validator('meta_description', pre=True, always=True)
     def template_meta_description(cls, v, values, **kwargs):

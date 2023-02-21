@@ -105,11 +105,12 @@ def freebie_plus_main_tab(driver: Remote, product: schemas.UploadFreebie, produc
     input_size = driver.find_element(By.ID, 'size')
     input_size = input_size.send_keys(product.size)
 
-    check_statistic = driver.find_element(By.ID, 'show_stats')
-    check_statistic.click()
+    if is_freebie:
+        check_statistic = driver.find_element(By.ID, 'show_stats')
+        check_statistic.click()
 
-    input_count = driver.find_element(By.ID, 'count_downloads')
-    input_count.send_keys('3')
+        input_count = driver.find_element(By.ID, 'count_downloads')
+        input_count.send_keys('3')
 
     if is_freebie and product.download_by_email:
         check_email = driver.find_element(By.ID, 'email_download')
