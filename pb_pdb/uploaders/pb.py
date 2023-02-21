@@ -185,11 +185,11 @@ def files_tab(driver: Remote, product_files: schemas.ProductFiles, base_url: str
     input_local = WebDriverWait(driver, timeout=20).until(
         lambda d: d.find_element(By.ID, 'vps_path')
     )
-    input_local.send_keys(product_files.product_url)
+    input_local.send_keys(urlparse(product_files.product_url).path.strip('/'))
 
     if product_files.product_s3_url:
         input_s3 = driver.find_element(By.ID, 's3_path')
-        input_s3.send_keys(product_files.product_s3_url)
+        input_s3.send_keys(input_local.send_keys(urlparse(product_files.product_s3_url).path.strip('/')))
 
 def freebie_plus_images_tab(driver: Remote, product_files: schemas.ProductFiles, base_url: str):
     driver.get(f'{base_url}#single-page-(images)')
