@@ -189,7 +189,7 @@ def files_tab(driver: Remote, product_files: schemas.ProductFiles, base_url: str
 
     if product_files.product_s3_url:
         input_s3 = driver.find_element(By.ID, 's3_path')
-        input_s3.send_keys(input_local.send_keys(urlparse(product_files.product_s3_url).path.strip('/')))
+        input_s3.send_keys(urlparse(product_files.product_s3_url).path.strip('/'))
 
 def freebie_plus_images_tab(driver: Remote, product_files: schemas.ProductFiles, base_url: str):
     driver.get(f'{base_url}#single-page-(images)')
