@@ -91,7 +91,7 @@ def freebie_plus_main_tab(driver: Remote, product: schemas.UploadFreebie, produc
 
     status_select = driver.find_element(By.ID, 'status')
     select_status_element = Select(status_select)
-    select_status_element.select_by_visible_text('Draft')
+    select_status_element.select_by_visible_text('Live')
 
     short_desc_area = driver.find_element(By.ID, 'short_description')
     short_desc_area.send_keys(product.excerpt)
@@ -104,6 +104,12 @@ def freebie_plus_main_tab(driver: Remote, product: schemas.UploadFreebie, produc
 
     input_size = driver.find_element(By.ID, 'size')
     input_size = input_size.send_keys(product.size)
+
+    check_statistic = driver.find_element(By.ID, 'show_stats')
+    check_statistic.click()
+
+    input_count = driver.find_element(By.ID, 'count_downloads')
+    input_count.send_keys('3')
 
     if is_freebie and product.download_by_email:
         check_email = driver.find_element(By.ID, 'email_download')
