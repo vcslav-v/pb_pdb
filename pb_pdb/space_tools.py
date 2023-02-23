@@ -10,8 +10,10 @@ def get_save_s3_obj(s3_objs: list[dict], filename: str, prefix, required=True, m
     elif not result and required:
         #TODO make exeption
         raise Exception
-    if multitude:
+    if multitude and result:
         return list(map(lambda x: x['Key'], result))
+    elif multitude and not result:
+        return []
     return result[0]['Key']
 
 def get_s3_link(client, key):
@@ -35,7 +37,7 @@ def get_file_urls(product) -> schemas.ProductFiles:
     )
     s3_objs = client.list_objects(Bucket=do_app.DO_SPACE_BUCKET)['Contents']
     img_for_push = get_save_s3_obj(s3_objs, 'image_for_push', product.prefix, required=False)
-    gallery = get_save_s3_obj(s3_objs, 'image_for_gallery_x2', product.prefix, multitude=True)
+    gallery = get_save_s3_obj(s3_objs, 'image_for_gallery_x2', product.prefix, required=False, multitude=True)
     main_img = get_save_s3_obj(s3_objs, 'main_x2', product.prefix)
     thumbnail_img = get_save_s3_obj(s3_objs, 'thumbnail_x2', product.prefix)
     if isinstance(product, schemas.UploadPrem):
