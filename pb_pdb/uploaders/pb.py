@@ -75,7 +75,7 @@ def login(driver: Remote):
     submit_button.click()
 
 def freebie_plus_main_tab(driver: Remote, product: schemas.UploadFreebie, product_files: schemas.ProductFiles, base_url: str, is_freebie=True):
-    driver.get(f'{base_url}#main')
+    driver.get(f'{base_url}?tab=main')
     input_title = WebDriverWait(driver, timeout=20).until(
         lambda d: d.find_element(By.ID, 'title')
     )
@@ -98,7 +98,7 @@ def freebie_plus_main_tab(driver: Remote, product: schemas.UploadFreebie, produc
 
     send_source_html_to_wysiwyg(
         driver,
-        '//section[@id="main"]//textarea[@id="description"]/..//button/span[text()="View"]',
+        '//div[@label="Main"]//textarea[@id="description"]/..//button/span[text()="View"]',
         product.description,
     )
 
@@ -126,7 +126,7 @@ def freebie_plus_main_tab(driver: Remote, product: schemas.UploadFreebie, produc
     input_image_push.send_keys(download_to_selenium(driver, product_files.push_url))
 
 def prem_main_tab(driver, product: schemas.UploadPrem, product_files: schemas.ProductFiles, base_url: str):
-    driver.get(f'{base_url}#main')
+    driver.get(f'{base_url}?tab=main')
     input_title = WebDriverWait(driver, timeout=20).until(
         lambda d: d.find_element(By.ID, 'title')
     )
@@ -182,7 +182,7 @@ def prem_main_tab(driver, product: schemas.UploadPrem, product_files: schemas.Pr
     input_image_push.send_keys(download_to_selenium(driver, product_files.push_url))
 
 def files_tab(driver: Remote, product_files: schemas.ProductFiles, base_url: str):
-    driver.get(f'{base_url}#files')
+    driver.get(f'{base_url}?tab=files')
     input_local = WebDriverWait(driver, timeout=20).until(
         lambda d: d.find_element(By.ID, 'vps_path')
     )
@@ -193,7 +193,7 @@ def files_tab(driver: Remote, product_files: schemas.ProductFiles, base_url: str
         input_s3.send_keys(urlparse(product_files.product_s3_url).path.strip('/'))
 
 def freebie_plus_images_tab(driver: Remote, product_files: schemas.ProductFiles, base_url: str):
-    driver.get(f'{base_url}#single-page-(images)')
+    driver.get(f'{base_url}?tab=single-page-images')
 
     input_single_image = WebDriverWait(driver, timeout=20).until(
             lambda d: d.find_element(By.ID, '__media__single_image')
@@ -205,7 +205,7 @@ def freebie_plus_images_tab(driver: Remote, product_files: schemas.ProductFiles,
         input_photo_gallery.send_keys(download_to_selenium(driver, gallery_img).replace('|', '_'))
 
 def prem_images_tab(driver, product_files: schemas.ProductFiles, base_url: str):
-    driver.get(f'{base_url}#single-page-(images)')
+    driver.get(f'{base_url}?tab=single-page-images')
 
     input_premium_main = WebDriverWait(driver, timeout=20).until(
             lambda d: d.find_element(By.ID, '__media__premium_main')
@@ -225,7 +225,7 @@ def prem_images_tab(driver, product_files: schemas.ProductFiles, base_url: str):
         input_premium_slider_x2.send_keys(download_to_selenium(driver, gallery_img).replace('|', '_'))
 
 def freebie_plus_retina_images_tab(driver: Remote, product_files: schemas.ProductFiles, base_url: str):
-    driver.get(f'{base_url}#single-page-(images-retina)')
+    driver.get(f'{base_url}?tab=single-page-images-retina')
 
     input_single_image = WebDriverWait(driver, timeout=20).until(
             lambda d: d.find_element(By.ID, '__media__single_image_retina')
@@ -237,7 +237,7 @@ def freebie_plus_retina_images_tab(driver: Remote, product_files: schemas.Produc
         input_photo_gallery.send_keys(download_to_selenium(driver, gallery_img).replace('|', '_'))
     
 def freebie_guest_authtor(driver: Remote, product: schemas.UploadFreebie):
-    driver.get(f'{PB_NEW_FREEBIE_URL}#single-page-text')
+    driver.get(f'{PB_NEW_FREEBIE_URL}?tab=single-page-text')
     input_author_name = WebDriverWait(driver, timeout=20).until(
         lambda d: d.find_element(By.ID, 'author_name')
     )
@@ -247,20 +247,20 @@ def freebie_guest_authtor(driver: Remote, product: schemas.UploadFreebie):
     input_authtor_url.send_keys(product.guest_author_link)
 
 def prem_single_page(driver, product: schemas.UploadPrem, base_url: str):
-    driver.get(f'{base_url}#single-page-(text)')
+    driver.get(f'{base_url}?tab=single-page-text')
     short_desc_area = WebDriverWait(driver, timeout=20).until(
-        lambda d: d.find_element(By.XPATH, '//section[@id="single-page-(text)"]//textarea[@id="short_description"]')
+        lambda d: d.find_element(By.XPATH, '//div[@label="Single page (text)"]//textarea[@id="short_description"]')
     )
     short_desc_area.send_keys(product.excerpt)
     
     send_source_html_to_wysiwyg(
         driver,
-        '//section[@id="single-page-(text)"]//textarea[@id="description"]/..//button/span[text()="View"]',
+        '//div[@label="Single page (text)"]//textarea[@id="description"]/..//button/span[text()="View"]',
         product.description,
     )
 
 def plus_guest_authtor(driver: Remote, product: schemas.UploadFreebie):
-    driver.get(f'{PB_NEW_PLUS_URL}#single-page-text')
+    driver.get(f'{PB_NEW_PLUS_URL}?tab=single-page-text')
     input_author_name = WebDriverWait(driver, timeout=20).until(
         lambda d: d.find_element(By.ID, 'author_name')
     )
@@ -270,49 +270,49 @@ def plus_guest_authtor(driver: Remote, product: schemas.UploadFreebie):
     input_authtor_url.send_keys(product.guest_author_link)
 
 def set_categories(driver: Remote, product: schemas.UploadProduct, base_url: str):
-    driver.get(f'{base_url}#categories')
+    driver.get(f'{base_url}?tab=categories')
 
     for category in product.categories:
         category_checkbox = WebDriverWait(driver, timeout=20).until(
-                lambda d: d.find_element(By.XPATH, f'//section[@id="categories"]//p[text()="{category}"]/../..')
+                lambda d: d.find_element(By.XPATH, f'//div[@label="Categories"]//p[text()="{category}"]/../..')
             )
         category_checkbox.click()
 
 def freebie_plus_formats(driver: Remote, product: schemas.UploadFreebie, base_url: str):
-    driver.get(f'{base_url}#formats')
+    driver.get(f'{base_url}?tab=formats')
 
     for product_format in product.formats:
         format_checkbox = WebDriverWait(driver, timeout=20).until(
-            lambda d: d.find_element(By.XPATH, f'//section[@id="formats"]//p[text()="{product_format}"]/../..')
+            lambda d: d.find_element(By.XPATH, f'//div[@label="Formats"]//p[text()="{product_format}"]/../..')
         )
         format_checkbox.click()
 
 def set_prem_features(driver, product: schemas.UploadPrem, base_url: str):
-    driver.get(f'{base_url}#features')
+    driver.get(f'{base_url}?tab=features')
     button_add_row = WebDriverWait(driver, timeout=20).until(
-        lambda d: d.find_element(By.XPATH, '//section[@id="features"]//button[contains(.,"Add row")]')
+        lambda d: d.find_element(By.XPATH, '//div[@label="Features"]//button[contains(.,"Add row")]')
     )
     button_add_row.click()
     input_title = WebDriverWait(driver, timeout=20).until(
-        lambda d: d.find_element(By.XPATH, '//section[@id="features"]//input[@id="title"]')
+        lambda d: d.find_element(By.XPATH, '//div[@label="Features"]//input[@id="title"]')
     )
     input_title.send_keys('Format')
-    input_value = driver.find_element(By.XPATH, '//section[@id="features"]//input[@id="value"]')
+    input_value = driver.find_element(By.XPATH, '//div[@label="Features"]//input[@id="value"]')
     input_value.send_keys(', '.join(product.formats))
     
     button_add_row = WebDriverWait(driver, timeout=20).until(
-        lambda d: d.find_element(By.XPATH, '//section[@id="features"]//button[contains(.,"Add row")]')
+        lambda d: d.find_element(By.XPATH, '//div[@label="Features"]//button[contains(.,"Add row")]')
     )
     button_add_row.click()
     input_title = WebDriverWait(driver, timeout=20).until(
-        lambda d: d.find_element(By.XPATH, '(//section[@id="features"]//input[@id="title"])[2]')
+        lambda d: d.find_element(By.XPATH, '(//div[@label="Features"]//input[@id="title"])[2]')
     )
     input_title.send_keys('File size')
-    input_value = driver.find_element(By.XPATH, '(//section[@id="features"]//input[@id="value"])[2]')
+    input_value = driver.find_element(By.XPATH, '(//div[@label="Features"]//input[@id="value"])[2]')
     input_value.send_keys(product.size.upper())
 
 def set_metatags(driver: Remote, product: schemas.UploadFreebie, base_url: str):
-    driver.get(f'{base_url}#meta-tags')
+    driver.get(f'{base_url}?tab=meta-tags')
 
     input_meta_title = WebDriverWait(driver, timeout=20).until(
         lambda d: d.find_element(By.ID, 'meta_title')
