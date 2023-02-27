@@ -94,7 +94,7 @@ def freebie_plus_main_tab(driver: Remote, product: schemas.UploadFreebie, produc
 
     status_select = driver.find_element(By.ID, 'status')
     select_status_element = Select(status_select)
-    select_status_element.select_by_visible_text('Draft')
+    select_status_element.select_by_visible_text('Live')
 
     short_desc_area = driver.find_element(By.ID, 'short_description')
     short_desc_area.send_keys(product.excerpt)
@@ -145,7 +145,7 @@ def prem_main_tab(driver, product: schemas.UploadPrem, product_files: schemas.Pr
 
     status_select = driver.find_element(By.ID, 'status')
     select_status_element = Select(status_select)
-    select_status_element.select_by_visible_text('Draft')
+    select_status_element.select_by_visible_text('Live')
 
     short_desc_area = driver.find_element(By.ID, 'short_description')
     short_desc_area.send_keys(product.excerpt)
