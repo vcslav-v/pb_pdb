@@ -18,6 +18,7 @@ class DOApp:
     def __init__(self, **envs) -> None:
         payloads = {'spec': {
             'name': f'{DROP_PREFIX}-{randint(1,100)}',
+            'region': 'fra',
             'services': [{
                 'http_port': 4444,
                 'name': 'browser',
@@ -25,9 +26,10 @@ class DOApp:
                     'registry_type': 'DOCKER_HUB',
                     'registry': 'selenoid',
                     'repository': 'chrome',
-                    'tag': 'latest',
+                    'tag': '110.0',
                 },
                 'instance_size_slug': 'basic-s',
+                'name': 'selenoid-chrome',
                 'envs': []
             }]
         }
