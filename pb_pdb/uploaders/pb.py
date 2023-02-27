@@ -415,7 +415,8 @@ def new_freebie(driver: Remote, product: schemas.UploadFreebie, product_files: s
     logger.debug('metatags freebie page')
     set_metatags(driver, product)
     logger.debug('freebie submit')
-    freebie_submit(driver, product)
+    pr_id = freebie_submit(driver, product)
+    make_push(driver, pr_id, PB_LIST_FREEBIE_URL)
 
 def new_plus(driver: Remote, product: schemas.UploadPlus, product_files: schemas.ProductFiles):
     logger.debug('get new plus page')
@@ -438,7 +439,8 @@ def new_plus(driver: Remote, product: schemas.UploadPlus, product_files: schemas
     logger.debug('metatags plus page')
     set_metatags(driver, product)
     logger.debug('plus submit')
-    plus_submit(driver, product)
+    pr_id = plus_submit(driver, product)
+    make_push(driver, pr_id, PB_LIST_PLUS_URL)
 
 
 def new_prem(driver: Remote, product: schemas.UploadPrem, product_files: schemas.ProductFiles):
@@ -460,7 +462,8 @@ def new_prem(driver: Remote, product: schemas.UploadPrem, product_files: schemas
     logger.debug('metatags prem page')
     set_metatags(driver, product)
     logger.debug('plus submit')
-    prem_submit(driver, product)
+    pr_id = prem_submit(driver, product)
+    make_push(driver, pr_id, PB_LIST_PREM_URL)
 
 
 def freebie(driver: Remote, product: schemas.UploadFreebie, product_files: schemas.ProductFiles):
