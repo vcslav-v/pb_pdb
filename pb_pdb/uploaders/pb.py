@@ -377,7 +377,6 @@ def prem_submit(driver: Remote, product: schemas.UploadPrem) -> str:
 
 
 def make_push(driver: Remote, product_id: int, base_url: str):
-    return
     driver.get(base_url)
 
     check_product = WebDriverWait(driver, timeout=20).until(
