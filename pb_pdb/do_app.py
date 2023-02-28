@@ -23,8 +23,10 @@ class DOApp:
                 'http_port': 4444,
                 'name': 'browser',
                 'image': {
-                    'registry_type': 'DOCR',
-                    'repository': 'selenoid',
+                    'registry_type': 'DOCKER_HUB',
+                    'registry': 'selenoid',
+                    'repository': 'chrome',
+                    'tag': 'latest',
                 },
                 'instance_size_slug': 'basic-s',
                 'name': 'selenoid-chrome',
