@@ -354,7 +354,7 @@ def freebie_submit(driver: Remote, product: schemas.UploadFreebie) -> str:
     p_id = WebDriverWait(driver, timeout=40).until(
         lambda d: d.find_element(By.XPATH, '//div[@class="tab-content main"]//h4[contains(text(),"ID")]/../..//p')
     )
-    return p_id.text
+    return p_id.text.strip()
 
 
 def plus_submit(driver: Remote, product: schemas.UploadPlus) -> str:
@@ -363,7 +363,7 @@ def plus_submit(driver: Remote, product: schemas.UploadPlus) -> str:
     p_id = WebDriverWait(driver, timeout=40).until(
         lambda d: d.find_element(By.XPATH, '//div[@class="tab-content main"]//h4[contains(text(),"ID")]/../..//p')
     )
-    return p_id.text
+    return p_id.text.strip()
 
 
 def prem_submit(driver: Remote, product: schemas.UploadPrem) -> str:
@@ -372,7 +372,7 @@ def prem_submit(driver: Remote, product: schemas.UploadPrem) -> str:
     p_id = WebDriverWait(driver, timeout=40).until(
             lambda d: d.find_element(By.XPATH, '//div[@class="tab-content main"]//h4[contains(text(),"ID")]/../..//p')
         )
-    return p_id.text
+    return p_id.text.strip()
 
 
 
@@ -392,6 +392,12 @@ def make_push(driver: Remote, product_id: int, base_url: str):
     
     action_button = driver.find_element(By.XPATH, '//button[@dusk="run-action-button"]')
     action_button.click()
+
+    button_submit = WebDriverWait(driver, timeout=20).until(
+        lambda d: d.find_element(By.XPATH, f'//button[@type="submit"]')
+    )
+    button_submit.click()
+    
     
 
 def new_freebie(driver: Remote, product: schemas.UploadFreebie, product_files: schemas.ProductFiles):
