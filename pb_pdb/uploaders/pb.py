@@ -397,6 +397,7 @@ def make_push(driver: Remote, product_id: int, base_url: str):
         lambda d: d.find_element(By.XPATH, f'//button[@type="submit"]')
     )
     button_submit.click()
+    sleep(5)
     
     
 
