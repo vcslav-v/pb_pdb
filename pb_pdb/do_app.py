@@ -29,7 +29,6 @@ class DOApp:
                     'tag': 'latest',
                 },
                 'instance_size_slug': 'basic-s',
-                'name': 'selenoid-chrome',
                 'envs': []
             }]
         }
