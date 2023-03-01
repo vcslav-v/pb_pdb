@@ -2,9 +2,14 @@ from pb_pdb import schemas, do_app
 from boto3 import session as s3_session
 
 def get_save_s3_obj(s3_objs: list[dict], filename: str, prefix, required=True, multitude=False):
-    result = list(filter(lambda x: x['Key'].startswith(
-        f'temp/{prefix}/{filename}'
-    ), s3_objs))
+    if multitude:
+        result = list(filter(
+            lambda x: x['Key'].split('.')[0].startswith(f'temp/{prefix}/{filename}|'), s3_objs)
+        )
+    else:
+        result = list(filter(
+            lambda x: x['Key'].split('.')[0] == f'temp/{prefix}/{filename}', s3_objs)
+        )
     if not result and not required:
         return result
     elif not result and required:
