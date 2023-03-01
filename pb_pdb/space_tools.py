@@ -36,12 +36,12 @@ def get_file_urls(product) -> schemas.ProductFiles:
         aws_secret_access_key=do_app.DO_SPACE_SECRET
     )
     s3_objs = client.list_objects(Bucket=do_app.DO_SPACE_BUCKET)['Contents']
-    img_for_push = get_save_s3_obj(s3_objs, 'image_for_push', product.prefix, required=False)
-    gallery = get_save_s3_obj(s3_objs, 'image_for_gallery_x2', product.prefix, required=False, multitude=True)
-    main_img = get_save_s3_obj(s3_objs, 'main_x2', product.prefix)
-    thumbnail_img = get_save_s3_obj(s3_objs, 'thumbnail_x2', product.prefix)
+    img_for_push = get_save_s3_obj(s3_objs, f'{product.product_file_name}-by-pixelbuddha-image_for_push', product.prefix, required=False)
+    gallery = get_save_s3_obj(s3_objs, f'{product.product_file_name}-by-pixelbuddha-image_for_gallery_x2', product.prefix, required=False, multitude=True)
+    main_img = get_save_s3_obj(s3_objs, f'{product.product_file_name}-by-pixelbuddha-main_x2', product.prefix)
+    thumbnail_img = get_save_s3_obj(s3_objs, f'{product.product_file_name}-by-pixelbuddha-thumbnail_x2', product.prefix)
     if isinstance(product, schemas.UploadPrem):
-        prem_thumbnail_img = get_save_s3_obj(s3_objs, 'prem_thumbnail_x2', product.prefix)
+        prem_thumbnail_img = get_save_s3_obj(s3_objs, f'{product.product_file_name}-by-pixelbuddha-prem_thumbnail_x2', product.prefix)
     product_file = get_save_s3_obj(s3_objs, product.product_file_name, product.prefix)
     
     result = schemas.ProductFiles(
