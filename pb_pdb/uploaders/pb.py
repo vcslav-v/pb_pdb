@@ -5,7 +5,7 @@ from urllib.parse import unquote, urlparse
 from loguru import logger
 import requests
 import json
-from selenium.webdriver import Remote
+from selenium.webdriver import Remote, ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
@@ -128,6 +128,8 @@ def freebie_plus_main_tab(driver: Remote, product: schemas.UploadFreebie, produc
     input_image_push = driver.find_element(By.ID, '__media__push_image')
     input_image_push.send_keys(download_to_selenium(driver, product_files.push_url))
 
+    make_alt_img(driver, product, 'Main')
+
 def prem_main_tab(driver, product: schemas.UploadPrem, product_files: schemas.ProductFiles, base_url: str):
     driver.get(f'{base_url}?tab=main')
     input_title = WebDriverWait(driver, timeout=20).until(
@@ -183,6 +185,7 @@ def prem_main_tab(driver, product: schemas.UploadPrem, product_files: schemas.Pr
 
     input_image_push = driver.find_element(By.ID, '__media__push_image')
     input_image_push.send_keys(download_to_selenium(driver, product_files.push_url))
+    make_alt_img(driver, product, 'Main')
 
 def files_tab(driver: Remote, product_files: schemas.ProductFiles):
     tab = driver.find_element(By.XPATH, '//div[@dusk="files-tab"]')
@@ -196,7 +199,7 @@ def files_tab(driver: Remote, product_files: schemas.ProductFiles):
         input_s3 = driver.find_element(By.ID, 's3_path')
         input_s3.send_keys(urlparse(product_files.product_s3_url).path.strip('/'))
 
-def freebie_plus_images_tab(driver: Remote, product_files: schemas.ProductFiles):
+def freebie_plus_images_tab(driver: Remote, product_files: schemas.ProductFiles, product: schemas.UploadProduct):
     tab = driver.find_element(By.XPATH, '//div[@dusk="single-page-images-tab"]')
     tab.click()
 
@@ -208,8 +211,9 @@ def freebie_plus_images_tab(driver: Remote, product_files: schemas.ProductFiles)
     input_photo_gallery = driver.find_element(By.ID, '__media__photo_gallery_2')
     for gallery_img in product_files.gallery_urls:
         input_photo_gallery.send_keys(download_to_selenium(driver, gallery_img).replace('|', '_'))
+    make_alt_img(driver, product, 'Single Page (images)')
 
-def prem_images_tab(driver, product_files: schemas.ProductFiles):
+def prem_images_tab(driver, product_files: schemas.ProductFiles, product: schemas.UploadPrem):
     tab = driver.find_element(By.XPATH, '//div[@dusk="single-page-images-tab"]')
     tab.click()
 
@@ -229,8 +233,10 @@ def prem_images_tab(driver, product_files: schemas.ProductFiles):
     input_premium_slider_x2 = driver.find_element(By.ID, '__media__premium_slider_retina')
     for gallery_img in product_files.gallery_x2_urls:
         input_premium_slider_x2.send_keys(download_to_selenium(driver, gallery_img).replace('|', '_'))
+    
+    make_alt_img(driver, product, 'Single page (images)')
 
-def freebie_plus_retina_images_tab(driver: Remote, product_files: schemas.ProductFiles):
+def freebie_plus_retina_images_tab(driver: Remote, product_files: schemas.ProductFiles, product: schemas.UploadProduct):
     tab = driver.find_element(By.XPATH, '//div[@dusk="single-page-images-retina-tab"]')
     tab.click()
 
@@ -242,6 +248,8 @@ def freebie_plus_retina_images_tab(driver: Remote, product_files: schemas.Produc
     input_photo_gallery = driver.find_element(By.ID, '__media__photo_gallery_2_retina')
     for gallery_img in product_files.gallery_x2_urls:
         input_photo_gallery.send_keys(download_to_selenium(driver, gallery_img).replace('|', '_'))
+    
+    make_alt_img(driver, product, 'Single Page (images retina)')
     
 def freebie_guest_authtor(driver: Remote, product: schemas.UploadFreebie):
     tab = driver.find_element(By.XPATH, '//div[@dusk="single-page-text-tab"]')
@@ -348,6 +356,31 @@ def set_metatags(driver: Remote, product: schemas.UploadFreebie):
     input_meta_desc = driver.find_element(By.ID, 'meta_description')
     input_meta_desc.send_keys(product.meta_description)
 
+
+def make_alt_img(driver: Remote, product: schemas.UploadFreebie, tab_lable: str):
+    images = driver.find_elements(
+        By.XPATH, 
+        f'//div[@label="{tab_lable}"]//div[contains(@class,"gallery-item-image")]'
+    )
+    button_alts = driver.find_elements(
+        By.XPATH,
+        '//div[@label="{tab_lable}"]//a[@title="Edit custom properties"]'
+    )
+    actions = ActionChains(driver)
+
+    for image, button_alt in zip(images, button_alts):
+        actions.move_to_element(image).pause(1).perform()
+        button_alt.click()
+    
+        input_alt = WebDriverWait(driver, timeout=40).until(
+            lambda d: d.find_element(By.XPATH, '//input[@id="alt"]')
+        )
+        input_alt.send_keys(product.meta_title)
+        button_update = driver.find_element(By.XPATH, '//div[@class="action"]/..//button[@type="submit"]')
+        button_update.click()
+        sleep(1)
+
+
 def freebie_submit(driver: Remote, product: schemas.UploadFreebie) -> str:
     button_submit = driver.find_element(By.XPATH, '//button[@type="submit"]')
     button_submit.click()
@@ -409,9 +442,9 @@ def new_freebie(driver: Remote, product: schemas.UploadFreebie, product_files: s
     logger.debug('files freebie page')
     files_tab(driver, product_files)
     logger.debug('images freebie page')
-    freebie_plus_images_tab(driver, product_files)
+    freebie_plus_images_tab(driver, product_files, product)
     logger.debug('retina images freebie page')
-    freebie_plus_retina_images_tab(driver, product_files)
+    freebie_plus_retina_images_tab(driver, product_files, product)
     if product.guest_author and product.guest_author_link:
         logger.debug('make guest authtor')
         freebie_guest_authtor(driver, product)
@@ -433,9 +466,9 @@ def new_plus(driver: Remote, product: schemas.UploadPlus, product_files: schemas
     logger.debug('files plus page')
     files_tab(driver, product_files)
     logger.debug('images plus page')
-    freebie_plus_images_tab(driver, product_files)
+    freebie_plus_images_tab(driver, product_files, product)
     logger.debug('retina images plus page')
-    freebie_plus_retina_images_tab(driver, product_files)
+    freebie_plus_retina_images_tab(driver, product_files, product)
     if product.guest_author and product.guest_author_link:
         logger.debug('make guest authtor')
         plus_guest_authtor(driver, product)
@@ -458,7 +491,7 @@ def new_prem(driver: Remote, product: schemas.UploadPrem, product_files: schemas
     logger.debug('files prem page')
     files_tab(driver, product_files)
     logger.debug('images prem page')
-    prem_images_tab(driver, product_files)
+    prem_images_tab(driver, product_files, product)
     logger.debug('retina prem plus page')
     prem_single_page(driver, product)
     logger.debug('categories prem page')
