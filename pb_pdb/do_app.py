@@ -28,7 +28,7 @@ class DOApp:
                     'repository': 'chrome',
                     'tag': 'latest',
                 },
-                'instance_size_slug': 'basic-s',
+                'instance_size_slug': 'basic-m',
                 'envs': []
             }]
         }
