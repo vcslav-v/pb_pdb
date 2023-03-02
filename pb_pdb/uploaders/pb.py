@@ -408,7 +408,7 @@ def prem_submit(driver: Remote, product: schemas.UploadPrem) -> str:
     return p_id.text.strip()
 
 
-
+@logger.catch
 def make_push(driver: Remote, product_id: int, base_url: str):
     driver.get(base_url)
 
@@ -434,8 +434,6 @@ def make_push(driver: Remote, product_id: int, base_url: str):
     WebDriverWait(driver, timeout=120).until(
         lambda d: d.find_element(By.XPATH, f'//div[@class="toasted nova success"]')
     )
-
-    
     
 
 def new_freebie(driver: Remote, product: schemas.UploadFreebie, product_files: schemas.ProductFiles):
@@ -460,6 +458,7 @@ def new_freebie(driver: Remote, product: schemas.UploadFreebie, product_files: s
     set_metatags(driver, product)
     logger.debug('freebie submit')
     pr_id = freebie_submit(driver, product)
+    logger.debug(f'pr_id={pr_id}')
     make_push(driver, pr_id, PB_LIST_FREEBIE_URL)
 
 def new_plus(driver: Remote, product: schemas.UploadPlus, product_files: schemas.ProductFiles):
@@ -507,6 +506,7 @@ def new_prem(driver: Remote, product: schemas.UploadPrem, product_files: schemas
     set_metatags(driver, product)
     logger.debug('plus submit')
     pr_id = prem_submit(driver, product)
+    logger.debug(f'pr_id={pr_id}')
     make_push(driver, pr_id, PB_LIST_PREM_URL)
 
 
