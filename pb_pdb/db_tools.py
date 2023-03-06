@@ -223,3 +223,28 @@ def get_status(prefix: str):
         if not db_upload_status:
             return
         return db_upload_status.status
+
+
+def add_to_product_schedule(schedule_date: datetime, edit_url: str):
+    with SessionLocal() as session:
+        new_row = models.ProductSchedule(
+            date_time=schedule_date,
+            edit_url=edit_url,
+        )
+        session.add(new_row)
+        session.commit()
+
+def rm_product_schedule(id: int):
+    with SessionLocal() as session:
+        product_row = session.query(models.ProductSchedule).filter_by(
+            id=id
+        ).first()
+        session.delete(product_row)
+        session.commit()
+
+def get_product_schedule(id: int):
+    with SessionLocal() as session:
+        schedule = session.query(models.ProductSchedule).order_by(
+            models.ProductSchedule.date_time
+        ).all()
+        return schedule

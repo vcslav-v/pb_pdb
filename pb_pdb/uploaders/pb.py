@@ -3,6 +3,7 @@ from time import sleep
 from urllib.parse import unquote, urlparse
 
 from loguru import logger
+from datetime import datetime
 import requests
 import json
 from selenium.webdriver import Remote, ActionChains
@@ -10,7 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from pb_pdb import schemas
+from pb_pdb import schemas, db_tools
 
 LOGIN_PB = os.environ.get('LOGIN_PB', '')
 PASS_PB = os.environ.get('PASS_PB', '')
@@ -24,6 +25,10 @@ PB_NEW_PREM_URL = os.environ.get('PB_NEW_PREM_URL', '')
 PB_LIST_FREEBIE_URL = os.environ.get('PB_NEW_FREEBIE_URL', '')
 PB_LIST_PLUS_URL = os.environ.get('PB_NEW_PLUS_URL', '')
 PB_LIST_PREM_URL = os.environ.get('PB_NEW_PREM_URL', '')
+PB_EDIT_FREEBIE_URL = os.environ.get('PB_NEW_FREEBIE_URL', '')
+PB_EDIT_PLUS_URL = os.environ.get('PB_NEW_PLUS_URL', '')
+PB_EDIT_PREM_URL = os.environ.get('PB_NEW_PREM_URL', '')
+
 
 
 def make_link_product_file(product_url: str, product_type: str):
@@ -92,9 +97,10 @@ def freebie_plus_main_tab(driver: Remote, product: schemas.UploadFreebie, produc
     input_date = driver.find_element(By.XPATH, '//input[@name="Date"]/../input[@type="text"]')
     input_date.send_keys(product.date_upload.strftime('%Y-%m-%d %H:%M:%S'))
 
+    status = 'Draft' if product.schedule_date else 'Live'
     status_select = driver.find_element(By.ID, 'status')
     select_status_element = Select(status_select)
-    select_status_element.select_by_visible_text('Live')
+    select_status_element.select_by_visible_text(status)
 
     short_desc_area = driver.find_element(By.ID, 'short_description')
     short_desc_area.send_keys(product.excerpt)
@@ -145,9 +151,10 @@ def prem_main_tab(driver, product: schemas.UploadPrem, product_files: schemas.Pr
     input_date = driver.find_element(By.XPATH, '//input[@name="Date"]/../input[@type="text"]')
     input_date.send_keys(product.date_upload.strftime('%Y-%m-%d %H:%M:%S'))
 
+    status = 'Draft' if product.schedule_date else 'Live'
     status_select = driver.find_element(By.ID, 'status')
     select_status_element = Select(status_select)
-    select_status_element.select_by_visible_text('Live')
+    select_status_element.select_by_visible_text(status)
 
     short_desc_area = driver.find_element(By.ID, 'short_description')
     short_desc_area.send_keys(product.excerpt)
@@ -381,30 +388,12 @@ def make_alt_img(driver: Remote, product: schemas.UploadFreebie, tab_lable: str)
         sleep(1)
 
 
-def freebie_submit(driver: Remote, product: schemas.UploadFreebie) -> str:
+def submit(driver: Remote) -> str:
     button_submit = driver.find_element(By.XPATH, '//button[@type="submit"]')
     button_submit.click()
     p_id = WebDriverWait(driver, timeout=40).until(
         lambda d: d.find_element(By.XPATH, '//div[@class="tab-content main"]//h4[contains(text(),"ID")]/../..//p')
     )
-    return p_id.text.strip()
-
-
-def plus_submit(driver: Remote, product: schemas.UploadPlus) -> str:
-    button_submit = driver.find_element(By.XPATH, '//button[@type="submit"]')
-    button_submit.click()
-    p_id = WebDriverWait(driver, timeout=40).until(
-        lambda d: d.find_element(By.XPATH, '//div[@class="tab-content main"]//h4[contains(text(),"ID")]/../..//p')
-    )
-    return p_id.text.strip()
-
-
-def prem_submit(driver: Remote, product: schemas.UploadPrem) -> str:
-    button_submit = driver.find_element(By.XPATH, '//button[@type="submit"]')
-    button_submit.click()
-    p_id = WebDriverWait(driver, timeout=40).until(
-            lambda d: d.find_element(By.XPATH, '//div[@class="tab-content main"]//h4[contains(text(),"ID")]/../..//p')
-        )
     return p_id.text.strip()
 
 
@@ -457,9 +446,15 @@ def new_freebie(driver: Remote, product: schemas.UploadFreebie, product_files: s
     logger.debug('metatags freebie page')
     set_metatags(driver, product)
     logger.debug('freebie submit')
-    pr_id = freebie_submit(driver, product)
+    pr_id = submit(driver)
     logger.debug(f'pr_id={pr_id}')
-    make_push(driver, pr_id, PB_LIST_FREEBIE_URL)
+    if product.schedule_date and datetime.utcnow() < product.schedule_date:
+        db_tools.add_to_product_schedule(
+            product.schedule_date,
+            PB_EDIT_FREEBIE_URL.format(pr_id=pr_id)
+        )
+    else:
+        make_push(driver, pr_id, PB_LIST_FREEBIE_URL)
 
 def new_plus(driver: Remote, product: schemas.UploadPlus, product_files: schemas.ProductFiles):
     logger.debug('get new plus page')
@@ -482,8 +477,14 @@ def new_plus(driver: Remote, product: schemas.UploadPlus, product_files: schemas
     logger.debug('metatags plus page')
     set_metatags(driver, product)
     logger.debug('plus submit')
-    pr_id = plus_submit(driver, product)
-    make_push(driver, pr_id, PB_LIST_PLUS_URL)
+    pr_id = submit(driver)
+    if product.schedule_date and datetime.utcnow() < product.schedule_date:
+        db_tools.add_to_product_schedule(
+            product.schedule_date,
+            PB_EDIT_PLUS_URL.format(pr_id=pr_id)
+        )
+    else:
+        make_push(driver, pr_id, PB_LIST_PLUS_URL)
 
 
 def new_prem(driver: Remote, product: schemas.UploadPrem, product_files: schemas.ProductFiles):
@@ -505,9 +506,15 @@ def new_prem(driver: Remote, product: schemas.UploadPrem, product_files: schemas
     logger.debug('metatags prem page')
     set_metatags(driver, product)
     logger.debug('plus submit')
-    pr_id = prem_submit(driver, product)
+    pr_id = submit(driver)
     logger.debug(f'pr_id={pr_id}')
-    make_push(driver, pr_id, PB_LIST_PREM_URL)
+    if product.schedule_date and datetime.utcnow() < product.schedule_date:
+        db_tools.add_to_product_schedule(
+            product.schedule_date,
+            PB_EDIT_PREM_URL.format(pr_id=pr_id)
+        )
+    else:
+        make_push(driver, pr_id, PB_LIST_PREM_URL)
 
 
 def freebie(driver: Remote, product: schemas.UploadFreebie, product_files: schemas.ProductFiles):

@@ -92,8 +92,8 @@ def pb_plus_upload(plus_product: schemas.UploadPlus, background_tasks: Backgroun
 
 @router.post('/pb_prem_upload')
 @logger.catch
-def pb_prem_upload(plus_product: schemas.UploadPrem, background_tasks: BackgroundTasks, _: str = Depends(get_current_username)):
-    background_tasks.add_task(service.upload_product, plus_product, 'pb', 'prem')
+def pb_prem_upload(prem_product: schemas.UploadPrem, background_tasks: BackgroundTasks, _: str = Depends(get_current_username)):
+    background_tasks.add_task(service.upload_product, prem_product, 'pb', 'prem')
 
 
 
@@ -101,3 +101,10 @@ def pb_prem_upload(plus_product: schemas.UploadPrem, background_tasks: Backgroun
 @logger.catch
 def get_status_upload(prefix, _: str = Depends(get_current_username)):
     return db_tools.get_status(prefix)
+
+
+@router.post('/push_uploader_links/{prefix}')
+@logger.catch
+def push_uploader_links(prefix: str, uploader_resp: schemas.UploaderResponse):
+    logger.debug(uploader_resp)
+    return uploader_resp

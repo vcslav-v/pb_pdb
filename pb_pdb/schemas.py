@@ -76,11 +76,12 @@ class UploadProduct(BaseModel):
     title: str
     slug: str
     excerpt: str
-    description: str
     size: str
+    description: str
+    date_upload: datetime
+    schedule_date: Optional[datetime]
     guest_author: Optional[str]
     guest_author_link: Optional[str]
-    date_upload: datetime
     categories: list[str] = []
     formats: list[str] = []
 

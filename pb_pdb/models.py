@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Boolean, Column, Date, ForeignKey, Integer,
-                        LargeBinary, Text)
+                        LargeBinary, Text, DateTime)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -99,3 +99,13 @@ class UploadStatus(Base):
     id = Column(Integer, primary_key=True)
     prefix = Column(Text, unique=True)
     status = Column(Text)
+
+
+class ProductSchedule(Base):
+    '''Product schedule.'''
+
+    __tablename__ = 'product_schedule'
+
+    id = Column(Integer, primary_key=True)
+    date_time = Column(DateTime)
+    edit_url = Column(Text)
