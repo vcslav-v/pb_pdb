@@ -105,6 +105,6 @@ def get_status_upload(prefix, _: str = Depends(get_current_username)):
 
 @router.post('/push_uploader_links/{prefix}')
 @logger.catch
-def push_uploader_links(prefix: str, request: Request):#uploader_resp: schemas.UploaderResponse):
-    logger.debug(request.json())
+async def push_uploader_links(prefix: str, request: Request):#uploader_resp: schemas.UploaderResponse):
+    logger.debug(await request.json())
     return request.json
