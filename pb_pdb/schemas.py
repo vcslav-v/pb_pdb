@@ -143,3 +143,7 @@ class ProductFiles(BaseModel):
     push_url: Optional[str]
     prem_thumbnail_url: Optional[str]
     prem_thumbnail_x2_url: Optional[str]
+
+
+class UploaderResponse(BaseModel):
+    pass
