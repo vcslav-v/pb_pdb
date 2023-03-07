@@ -40,7 +40,8 @@ def make_link_product_file(product_url: str, product_type: str, prefix: str):
             'type': product_type,
             'load_to_s3': False if product_type == 'freebie' else True,
             'callback': CALL_BACK_URL.format(prefix=prefix)
-    }
+        }
+        logger.debug(data)
         session.auth = (PB_UPL_API_LOGIN, PB_UPL_API_PASS)
         resp = session.post(PB_UPL_API_URL, json=data)
         resp.raise_for_status()
