@@ -28,25 +28,29 @@ PB_LIST_PREM_URL = os.environ.get('PB_NEW_PREM_URL', '')
 PB_EDIT_FREEBIE_URL = os.environ.get('PB_NEW_FREEBIE_URL', '')
 PB_EDIT_PLUS_URL = os.environ.get('PB_NEW_PLUS_URL', '')
 PB_EDIT_PREM_URL = os.environ.get('PB_NEW_PREM_URL', '')
+CALL_BACK_URL = os.environ.get('PB_NEW_PREM_URL', '')
 
 
 
-def make_link_product_file(product_url: str, product_type: str):
+def make_link_product_file(product_url: str, product_type: str, prefix: str):
     with requests.sessions.Session() as session:
         product = product_url.split('?')[0]
         data = {
             'upload': product,
             'type': product_type,
             'load_to_s3': False if product_type == 'freebie' else True,
-            'callback': ''
+            'callback': CALL_BACK_URL.format(prefix=prefix)
     }
         session.auth = (PB_UPL_API_LOGIN, PB_UPL_API_PASS)
         resp = session.post(PB_UPL_API_URL, json=data)
         resp.raise_for_status()
-        result = json.loads(resp.content)
-        if not result['success']:
-            raise ValueError("Can't upload to pb")
-        return (result['local_link'], result['s3_link'] if result['s3_link'] else None)
+        result = db_tools.get_callback_data(prefix)
+        while not result:
+            sleep(5)
+            result = db_tools.get_callback_data(prefix)
+        db_tools.rm_callback(prefix)
+        result = schemas.UploaderResponse.parse_raw(result)
+        return (result.local_link, result.s3_link if result.s3_link else None)
 
 
 def send_source_html_to_wysiwyg(driver: Remote, xpath_view: str, source_html: str):

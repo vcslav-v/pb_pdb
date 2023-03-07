@@ -1,7 +1,7 @@
 import os
 import secrets
 
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from loguru import logger
 from pb_pdb import schemas, trello_tools, db_tools
@@ -105,7 +105,5 @@ def get_status_upload(prefix, _: str = Depends(get_current_username)):
 
 @router.post('/push_uploader_links/{prefix}')
 @logger.catch
-async def push_uploader_links(prefix: str, request: Request):#uploader_resp: schemas.UploaderResponse):
-    logger.debug(prefix)
-    logger.debug(await request.body())
-    return request.json
+def push_uploader_links(prefix: str, uploader_resp: schemas.UploaderResponse):
+    db_tools.set_uploader_callback(uploader_resp, prefix)

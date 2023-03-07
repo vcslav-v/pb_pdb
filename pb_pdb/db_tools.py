@@ -242,9 +242,34 @@ def rm_product_schedule(id: int):
         session.delete(product_row)
         session.commit()
 
-def get_product_schedule(id: int):
+def get_product_schedule():
     with SessionLocal() as session:
         schedule = session.query(models.ProductSchedule).order_by(
             models.ProductSchedule.date_time
         ).all()
         return schedule
+
+def set_uploader_callback(callback_data: schemas.UploaderResponse, prefix: str):
+    with SessionLocal() as session:
+        callback = models.Callback(
+            prefix=prefix,
+            data=callback_data.json()
+        )
+        session.add(callback)
+        session.commit()
+
+def get_callback_data(prefix: str):
+    with SessionLocal() as session:
+        callback = session.query(models.Callback).filter_by(
+            prefix=prefix
+        ).first()
+        if callback:
+            return callback.data
+
+def rm_callback(prefix: str):
+    with SessionLocal() as session:
+        callback = session.query(models.Callback).filter_by(
+            prefix=prefix
+        ).first()
+        session.delete(callback)
+        session.commit()

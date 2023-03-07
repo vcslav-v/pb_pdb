@@ -109,3 +109,13 @@ class ProductSchedule(Base):
     id = Column(Integer, primary_key=True)
     date_time = Column(DateTime)
     edit_url = Column(Text)
+
+
+class Callback(Base):
+    '''callbacks.'''
+
+    __tablename__ = 'callbacks'
+
+    id = Column(Integer, primary_key=True)
+    prefix = Column(Text, unique=True)
+    data = Column(Text)

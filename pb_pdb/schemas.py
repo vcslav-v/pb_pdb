@@ -146,4 +146,7 @@ class ProductFiles(BaseModel):
 
 
 class UploaderResponse(BaseModel):
-    pass
+    success: bool
+    is_s3: bool
+    local_link: str
+    s3_link: Optional[str]
