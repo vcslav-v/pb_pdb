@@ -28,7 +28,7 @@ PB_LIST_PREM_URL = os.environ.get('PB_NEW_PREM_URL', '')
 PB_EDIT_FREEBIE_URL = os.environ.get('PB_NEW_FREEBIE_URL', '')
 PB_EDIT_PLUS_URL = os.environ.get('PB_NEW_PLUS_URL', '')
 PB_EDIT_PREM_URL = os.environ.get('PB_NEW_PREM_URL', '')
-CALL_BACK_URL = os.environ.get('PB_NEW_PREM_URL', '')
+CALL_BACK_URL = os.environ.get('CALL_BACK_URL', '')
 
 
 
