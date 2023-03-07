@@ -102,7 +102,7 @@ def freebie_plus_main_tab(driver: Remote, product: schemas.UploadFreebie, produc
     input_date = driver.find_element(By.XPATH, '//input[@name="Date"]/../input[@type="text"]')
     input_date.send_keys(product.date_upload.strftime('%Y-%m-%d %H:%M:%S'))
 
-    status = 'Draft'# if product.schedule_date else 'Live'
+    status = 'Draft' if product.schedule_date else 'Live'
     status_select = driver.find_element(By.ID, 'status')
     select_status_element = Select(status_select)
     select_status_element.select_by_visible_text(status)
@@ -156,7 +156,7 @@ def prem_main_tab(driver, product: schemas.UploadPrem, product_files: schemas.Pr
     input_date = driver.find_element(By.XPATH, '//input[@name="Date"]/../input[@type="text"]')
     input_date.send_keys(product.date_upload.strftime('%Y-%m-%d %H:%M:%S'))
 
-    status = 'Draft'# if product.schedule_date else 'Live'
+    status = 'Draft' if product.schedule_date else 'Live'
     status_select = driver.find_element(By.ID, 'status')
     select_status_element = Select(status_select)
     select_status_element.select_by_visible_text(status)
