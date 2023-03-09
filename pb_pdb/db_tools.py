@@ -243,6 +243,14 @@ def rm_product_schedule(id: int):
         session.delete(product_row)
         session.commit()
 
+def update_product_schedule(id: int, date_time: datetime):
+    with SessionLocal() as session:
+        product_row = session.query(models.ProductSchedule).filter_by(
+            id=id
+        ).first()
+        product_row.date_time = date_time
+        session.commit()
+
 def get_product_schedule(publish_date_time: datetime = None):
     with SessionLocal() as session:
         if publish_date_time:

@@ -107,3 +107,29 @@ def get_status_upload(prefix, _: str = Depends(get_current_username)):
 @logger.catch
 def push_uploader_links(prefix: str, uploader_resp: schemas.UploaderResponse):
     db_tools.set_uploader_callback(uploader_resp, prefix)
+
+@router.post('/rm_task/{ident}')
+@logger.catch
+def rm_task(ident: int, _: str = Depends(get_current_username)):
+    db_tools.rm_product_schedule(ident)
+
+
+@router.post('/update_date_task/{ident}')
+@logger.catch
+def update_date_task(ident: int, schedule: schemas.ScheduleUpdate, _: str = Depends(get_current_username)):
+    db_tools.update_product_schedule(ident, schedule.date_time)
+
+
+@router.post('/get_product_schedule')
+@logger.catch
+def get_product_schedule(_: str = Depends(get_current_username)):
+    db_result = db_tools.get_product_schedule()
+    result =  schemas.PageProductsSchedule(
+        page=[schemas.ProductsSchedule(
+            ident = task.id,
+            name=task.name,
+            edit_link=task.edit_url,
+            date_time=task.date_time,
+        ) for task in db_result]
+    )
+    return result

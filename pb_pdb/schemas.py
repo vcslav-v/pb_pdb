@@ -150,3 +150,14 @@ class UploaderResponse(BaseModel):
     is_s3: bool
     local_link: str
     s3_link: Optional[str]
+
+class ScheduleUpdate(BaseModel):
+    date_time: datetime
+
+class ProductsSchedule(ScheduleUpdate):
+    ident: int
+    name: str
+    edit_link: str
+
+class PageProductsSchedule(BaseModel):
+    page: list[ProductsSchedule] = []
