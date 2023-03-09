@@ -225,11 +225,12 @@ def get_status(prefix: str):
         return db_upload_status.status
 
 
-def add_to_product_schedule(schedule_date: datetime, edit_url: str):
+def add_to_product_schedule(schedule_date: datetime, edit_url: str, title: str):
     with SessionLocal() as session:
         new_row = models.ProductSchedule(
             date_time=schedule_date,
             edit_url=edit_url,
+            name=title,
         )
         session.add(new_row)
         session.commit()

@@ -109,6 +109,7 @@ class ProductSchedule(Base):
     id = Column(Integer, primary_key=True)
     date_time = Column(DateTime)
     edit_url = Column(Text)
+    name = Column(Text)
 
 
 class Callback(Base):

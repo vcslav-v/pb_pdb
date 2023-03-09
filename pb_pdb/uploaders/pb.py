@@ -456,7 +456,8 @@ def new_freebie(driver: Remote, product: schemas.UploadFreebie, product_files: s
     if product.schedule_date and datetime.utcnow().timestamp() < product.schedule_date.timestamp():
         db_tools.add_to_product_schedule(
             product.schedule_date,
-            PB_EDIT_FREEBIE_URL.format(pr_id=pr_id)
+            PB_EDIT_FREEBIE_URL.format(pr_id=pr_id),
+            product.title,
         )
     else:
         make_push(driver, pr_id, PB_LIST_FREEBIE_URL)
@@ -486,7 +487,8 @@ def new_plus(driver: Remote, product: schemas.UploadPlus, product_files: schemas
     if product.schedule_date and datetime.utcnow() < product.schedule_date:
         db_tools.add_to_product_schedule(
             product.schedule_date,
-            PB_EDIT_PLUS_URL.format(pr_id=pr_id)
+            PB_EDIT_PLUS_URL.format(pr_id=pr_id),
+            product.title,
         )
     else:
         make_push(driver, pr_id, PB_LIST_PLUS_URL)
@@ -516,7 +518,8 @@ def new_prem(driver: Remote, product: schemas.UploadPrem, product_files: schemas
     if product.schedule_date and datetime.utcnow() < product.schedule_date:
         db_tools.add_to_product_schedule(
             product.schedule_date,
-            PB_EDIT_PREM_URL.format(pr_id=pr_id)
+            PB_EDIT_PREM_URL.format(pr_id=pr_id),
+            product.title,
         )
     else:
         make_push(driver, pr_id, PB_LIST_PREM_URL)
