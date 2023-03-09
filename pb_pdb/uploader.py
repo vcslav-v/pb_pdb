@@ -58,3 +58,10 @@ def to_pb_prem(product: schemas.UploadPrem):
         db_tools.set_status(product.prefix, 'Uploading to PB')
         uploaders.pb.prem(driver, product, product_files)
     db_tools.set_status(product.prefix, 'Uploaded to PB')
+
+
+@logger.catch
+def make_live(edit_link: str):
+    with browser.Browser() as chrome:
+        driver = chrome.driver
+        uploaders.pb.make_live(driver, edit_link)

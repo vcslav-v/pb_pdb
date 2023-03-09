@@ -242,11 +242,16 @@ def rm_product_schedule(id: int):
         session.delete(product_row)
         session.commit()
 
-def get_product_schedule():
+def get_product_schedule(publish_date_time: datetime = None):
     with SessionLocal() as session:
-        schedule = session.query(models.ProductSchedule).order_by(
-            models.ProductSchedule.date_time
-        ).all()
+        if publish_date_time:
+            schedule = session.query(models.ProductSchedule).filter(
+                models.ProductSchedule.date_time >= publish_date_time
+            ).all()
+        else:
+            schedule = session.query(models.ProductSchedule).order_by(
+                models.ProductSchedule.date_time
+            ).all()
         return schedule
 
 def set_uploader_callback(callback_data: schemas.UploaderResponse, prefix: str):

@@ -453,7 +453,7 @@ def new_freebie(driver: Remote, product: schemas.UploadFreebie, product_files: s
     logger.debug('freebie submit')
     pr_id = submit(driver)
     logger.debug(f'pr_id={pr_id}')
-    if product.schedule_date and datetime.utcnow() < product.schedule_date:
+    if product.schedule_date and datetime.utcnow().timestamp() < product.schedule_date.timestamp():
         db_tools.add_to_product_schedule(
             product.schedule_date,
             PB_EDIT_FREEBIE_URL.format(pr_id=pr_id)
@@ -534,3 +534,15 @@ def plus(driver: Remote, product: schemas.UploadPlus, product_files: schemas.Pro
 def prem(driver: Remote, product: schemas.UploadPrem, product_files: schemas.ProductFiles):
     login(driver)
     new_prem(driver, product, product_files)
+
+def make_live(driver: Remote, edit_link: str):
+    login(driver)
+    driver.get(edit_link)
+    status_select = driver.find_element(By.ID, 'status')
+    select_status_element = Select(status_select)
+    select_status_element.select_by_visible_text('Live')
+    pr_id = submit(driver)
+    edit_link_parsed = urlparse(edit_link)
+    url_list = f'{edit_link_parsed.scheme}://{edit_link_parsed.netloc}{"/".join(edit_link_parsed.path.split("/")[:-2])}'
+    make_push(driver, pr_id, url_list)
+    
