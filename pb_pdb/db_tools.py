@@ -255,7 +255,7 @@ def get_product_schedule(publish_date_time: datetime = None):
     with SessionLocal() as session:
         if publish_date_time:
             schedule = session.query(models.ProductSchedule).filter(
-                models.ProductSchedule.date_time >= publish_date_time
+                models.ProductSchedule.date_time <= publish_date_time
             ).all()
         else:
             schedule = session.query(models.ProductSchedule).order_by(
