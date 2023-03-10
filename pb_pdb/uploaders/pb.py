@@ -78,7 +78,9 @@ def download_to_selenium(driver: Remote, link: str) -> str:
 def login(driver: Remote):
     driver.get(ADMIN_PB_URL)
 
-    input_email = driver.find_element(By.XPATH, '//input[@type="email"]')
+    input_email = WebDriverWait(driver, timeout=20).until(
+        lambda d: d.find_element(By.XPATH, '//input[@type="email"]')
+    )
     input_email.send_keys(LOGIN_PB)
 
     input_pass = driver.find_element(By.XPATH, '//input[@type="password"]')
@@ -542,7 +544,9 @@ def prem(driver: Remote, product: schemas.UploadPrem, product_files: schemas.Pro
 def make_live(driver: Remote, edit_link: str):
     login(driver)
     driver.get(edit_link)
-    status_select = driver.find_element(By.ID, 'status')
+    status_select = WebDriverWait(driver, timeout=20).until(
+        lambda d: d.find_element(By.ID, 'status')
+    )
     select_status_element = Select(status_select)
     select_status_element.select_by_visible_text('Live')
     pr_id = submit(driver)
