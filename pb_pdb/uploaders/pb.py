@@ -453,6 +453,7 @@ def new_freebie(driver: Remote, product: schemas.UploadFreebie, product_files: s
     logger.debug('freebie submit')
     pr_id = submit(driver)
     logger.debug(f'pr_id={pr_id}')
+    logger.debug(f'{PB_EDIT_FREEBIE_URL.format(pr_id=pr_id)}')
     if product.schedule_date and datetime.utcnow().timestamp() < product.schedule_date.timestamp():
         db_tools.add_to_product_schedule(
             product.schedule_date,
