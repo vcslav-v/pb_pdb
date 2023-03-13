@@ -83,16 +83,19 @@ def get_common_data() -> schemas.ProductPageData:
 @router.post('/pb_freebie_upload')
 @logger.catch
 def pb_freebie_upload(freebie_product: schemas.UploadFreebie, background_tasks: BackgroundTasks, _: str = Depends(get_current_username)):
+    logger.debug(freebie_product)
     background_tasks.add_task(service.upload_product, freebie_product, 'pb', 'freebie')
 
 @router.post('/pb_plus_upload')
 @logger.catch
 def pb_plus_upload(plus_product: schemas.UploadPlus, background_tasks: BackgroundTasks, _: str = Depends(get_current_username)):
+    logger.debug(plus_product)
     background_tasks.add_task(service.upload_product, plus_product, 'pb', 'plus')
 
 @router.post('/pb_prem_upload')
 @logger.catch
 def pb_prem_upload(prem_product: schemas.UploadPrem, background_tasks: BackgroundTasks, _: str = Depends(get_current_username)):
+    logger.debug(prem_product)
     background_tasks.add_task(service.upload_product, prem_product, 'pb', 'prem')
 
 
