@@ -234,17 +234,21 @@ def prem_images_tab(driver, product_files: schemas.ProductFiles, product: schema
     input_premium_main = WebDriverWait(driver, timeout=20).until(
             lambda d: d.find_element(By.ID, '__media__premium_main')
         )
-    input_premium_main.send_keys(download_to_selenium(driver, product_files.main_img_url))
+    main_img_path = download_to_selenium(driver, product_files.main_img_url)
+    input_premium_main.send_keys(main_img_path)
     
     input_premium_main_x2 = driver.find_element(By.ID, '__media__premium_main_retina')
-    input_premium_main_x2.send_keys(download_to_selenium(driver, product_files.main_img_x2_url))
+    main_img_path_x2 = download_to_selenium(driver, product_files.main_img_x2_url)
+    input_premium_main_x2.send_keys(main_img_path_x2)
     
 
     input_premium_slider = driver.find_element(By.ID, '__media__premium_slider')
+    input_premium_slider.send_keys(main_img_path)
     for gallery_img in product_files.gallery_urls:
         input_premium_slider.send_keys(download_to_selenium(driver, gallery_img).replace('|', '_'))
     
     input_premium_slider_x2 = driver.find_element(By.ID, '__media__premium_slider_retina')
+    input_premium_slider_x2.send_keys(main_img_path_x2)
     for gallery_img in product_files.gallery_x2_urls:
         input_premium_slider_x2.send_keys(download_to_selenium(driver, gallery_img).replace('|', '_'))
     
