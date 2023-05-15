@@ -57,7 +57,7 @@ def make_final_text(card_id: str):
 
 @router.get('/publish')
 @logger.catch
-def make_final_text(card_id: str):
+def publish(card_id: str):
     trello_tools.publish(card_id)
 
 
@@ -73,6 +73,7 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
     products = db_tools.get_products(filter_data)
     return products
 
+
 @router.get('/common_data')
 @logger.catch
 def get_common_data() -> schemas.ProductPageData:
@@ -82,22 +83,35 @@ def get_common_data() -> schemas.ProductPageData:
 
 @router.post('/pb_freebie_upload')
 @logger.catch
-def pb_freebie_upload(freebie_product: schemas.UploadFreebie, background_tasks: BackgroundTasks, _: str = Depends(get_current_username)):
+def pb_freebie_upload(
+    freebie_product: schemas.UploadFreebie,
+    background_tasks: BackgroundTasks,
+    _: str = Depends(get_current_username)
+):
     logger.debug(freebie_product)
     background_tasks.add_task(service.upload_product, freebie_product, 'pb', 'freebie')
 
+
 @router.post('/pb_plus_upload')
 @logger.catch
-def pb_plus_upload(plus_product: schemas.UploadPlus, background_tasks: BackgroundTasks, _: str = Depends(get_current_username)):
+def pb_plus_upload(
+    plus_product: schemas.UploadPlus,
+    background_tasks: BackgroundTasks,
+    _: str = Depends(get_current_username)
+):
     logger.debug(plus_product)
     background_tasks.add_task(service.upload_product, plus_product, 'pb', 'plus')
 
+
 @router.post('/pb_prem_upload')
 @logger.catch
-def pb_prem_upload(prem_product: schemas.UploadPrem, background_tasks: BackgroundTasks, _: str = Depends(get_current_username)):
+def pb_prem_upload(
+    prem_product: schemas.UploadPrem,
+    background_tasks: BackgroundTasks,
+    _: str = Depends(get_current_username)
+):
     logger.debug(prem_product)
     background_tasks.add_task(service.upload_product, prem_product, 'pb', 'prem')
-
 
 
 @router.post('/get_status_upload')
@@ -111,6 +125,7 @@ def get_status_upload(prefix, _: str = Depends(get_current_username)):
 def push_uploader_links(prefix: str, uploader_resp: schemas.UploaderResponse):
     db_tools.set_uploader_callback(uploader_resp, prefix)
 
+
 @router.post('/rm_task/{ident}')
 @logger.catch
 def rm_task(ident: int, _: str = Depends(get_current_username)):
@@ -119,7 +134,11 @@ def rm_task(ident: int, _: str = Depends(get_current_username)):
 
 @router.post('/update_date_task/{ident}')
 @logger.catch
-def update_date_task(ident: int, schedule: schemas.ScheduleUpdate, _: str = Depends(get_current_username)):
+def update_date_task(
+    ident: int,
+    schedule: schemas.ScheduleUpdate,
+    _: str = Depends(get_current_username)
+):
     db_tools.update_product_schedule(ident, schedule.date_time)
 
 
@@ -127,9 +146,9 @@ def update_date_task(ident: int, schedule: schemas.ScheduleUpdate, _: str = Depe
 @logger.catch
 def get_product_schedule(_: str = Depends(get_current_username)):
     db_result = db_tools.get_product_schedule()
-    result =  schemas.PageProductsSchedule(
+    result = schemas.PageProductsSchedule(
         page=[schemas.ProductsSchedule(
-            ident = task.id,
+            ident=task.id,
             name=task.name,
             edit_link=task.edit_url,
             date_time=task.date_time,

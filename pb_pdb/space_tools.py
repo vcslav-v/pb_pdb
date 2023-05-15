@@ -1,11 +1,13 @@
 from pb_pdb import schemas, do_app
 from boto3 import session as s3_session
 
+
 def get_save_s3_obj(s3_objs: list[dict], filename: str, prefix, required=True, multitude=False):
     if multitude:
         result = list(filter(
             lambda x: x['Key'].split('.')[0].startswith(f'temp/{prefix}/{filename}|'), s3_objs)
         )
+        result.sort(key=lambda x: int(x['Key'].split('.')[0].split('|')[-1]))
     else:
         result = list(filter(
             lambda x: x['Key'].split('.')[0] == f'temp/{prefix}/{filename}', s3_objs)
@@ -31,6 +33,7 @@ def get_s3_link(client, key):
         ExpiresIn=3000
     )
 
+
 def get_file_urls(product) -> schemas.ProductFiles:
     do_session = s3_session.Session()
     client = do_session.client(
@@ -48,7 +51,7 @@ def get_file_urls(product) -> schemas.ProductFiles:
     if isinstance(product, schemas.UploadPrem):
         prem_thumbnail_img = get_save_s3_obj(s3_objs, f'{product.product_file_name}-by-pixelbuddha-prem_thumbnail_x2', product.prefix)
     product_file = get_save_s3_obj(s3_objs, product.product_file_name, product.prefix)
-    
+
     result = schemas.ProductFiles(
         product_url=get_s3_link(client, product_file),
         main_img_x2_url=get_s3_link(client, main_img),
@@ -59,7 +62,7 @@ def get_file_urls(product) -> schemas.ProductFiles:
         result.push_url = get_s3_link(client, img_for_push)
     if isinstance(product, schemas.UploadPrem):
         result.prem_thumbnail_x2_url = get_s3_link(client, prem_thumbnail_img)
-    
+
     client.close()
     return result
 
