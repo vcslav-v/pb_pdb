@@ -502,8 +502,14 @@ def make_push(driver: Remote, product_id: int, base_url: str):
 
 
 @logger.catch
-def set_tags(driver: Remote, product: schemas.UploadProduct):
-    tab = driver.find_element(By.XPATH, '//div[@dusk="tags-tab"]')
+def set_tags(driver: Remote, product: schemas.UploadProduct, base_url: str, product_id: int):
+    driver.get(base_url.format(pr_id=product_id))
+    tab = WebDriverWait(driver, timeout=20).until(
+            lambda d: d.find_element(
+                By.XPATH,
+                '//div[@dusk="tags-tab"]'
+            )
+        )
     tab.click()
 
     for product_tag in product.tags:
@@ -514,6 +520,15 @@ def set_tags(driver: Remote, product: schemas.UploadProduct):
             )
         )
         tag_checkbox.click()
+    button_submit = driver.find_element(By.XPATH, '//button[@type="submit"]')
+    button_submit.click()
+
+    WebDriverWait(driver, timeout=40).until(
+        lambda d: d.find_element(
+            By.XPATH,
+            '//div[@class="tab-content main"]//h4[contains(text(),"ID")]/../..//p'
+        )
+    )
 
 
 def new_freebie(
@@ -540,9 +555,9 @@ def new_freebie(
     freebie_plus_formats(driver, product)
     logger.debug('metatags freebie page')
     set_metatags(driver, product)
-    set_tags(driver, product)
     logger.debug('freebie submit')
     pr_id = submit(driver)
+    set_tags(driver, product, PB_EDIT_FREEBIE_URL, pr_id)
     logger.debug(f'pr_id={pr_id}')
     logger.debug(f'{PB_EDIT_FREEBIE_URL.format(pr_id=pr_id)}')
     if product.schedule_date and datetime.utcnow().timestamp() < product.schedule_date.timestamp():
@@ -575,9 +590,9 @@ def new_plus(driver: Remote, product: schemas.UploadPlus, product_files: schemas
     freebie_plus_formats(driver, product)
     logger.debug('metatags plus page')
     set_metatags(driver, product)
-    set_tags(driver, product)
     logger.debug('plus submit')
     pr_id = submit(driver)
+    set_tags(driver, product, PB_EDIT_PLUS_URL, pr_id)
     if product.schedule_date and datetime.utcnow() < product.schedule_date:
         db_tools.add_to_product_schedule(
             product.schedule_date,
@@ -606,9 +621,9 @@ def new_prem(driver: Remote, product: schemas.UploadPrem, product_files: schemas
     set_compatibilities(driver, product)
     logger.debug('metatags prem page')
     set_metatags(driver, product)
-    set_tags(driver, product)
     logger.debug('plus submit')
     pr_id = submit(driver)
+    set_tags(driver, product, PB_EDIT_PREM_URL, pr_id)
     logger.debug(f'pr_id={pr_id}')
     if product.schedule_date and datetime.utcnow() < product.schedule_date:
         db_tools.add_to_product_schedule(
