@@ -84,6 +84,7 @@ class UploadProduct(BaseModel):
     guest_author_link: Optional[str]
     categories: list[str] = []
     formats: list[str] = []
+    tags: list[str] = []
 
 
 class UploadFreebie(UploadProduct):
