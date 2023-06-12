@@ -3,11 +3,10 @@ from selenium import webdriver
 from pb_pdb import do_app
 
 
-
 class Browser:
     def __init__(self) -> None:
         self.app_instance = do_app.DOApp()
-        
+
         browser_options = webdriver.chrome.options.Options()
         chrome_prefs = {'profile.default_content_setting_values.automatic_downloads': 1}
         browser_options.experimental_options["prefs"] = chrome_prefs
@@ -15,7 +14,7 @@ class Browser:
         browser_options.set_capability('browserName', 'chrome')
         browser_options.set_capability('enableVNC', False)
         browser_options.set_capability('enableVideo', False)
-        
+
         self.driver = webdriver.Remote(
             command_executor=self.app_instance.url,
             options=browser_options,

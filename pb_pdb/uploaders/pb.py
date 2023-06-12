@@ -31,7 +31,6 @@ PB_EDIT_PREM_URL = os.environ.get('PB_EDIT_PREM_URL', '')
 CALL_BACK_URL = os.environ.get('CALL_BACK_URL', '')
 
 
-
 def make_link_product_file(product_url: str, product_type: str, prefix: str):
     with requests.sessions.Session() as session:
         product = product_url.split('?')[0]
@@ -243,12 +242,12 @@ def freebie_plus_images_tab(
 ):
     tab = driver.find_element(By.XPATH, '//div[@dusk="single-page-images-tab"]')
     tab.click()
-
+    db_tools.set_status(product.prefix, 'Set main image')
     input_single_image = WebDriverWait(driver, timeout=20).until(
             lambda d: d.find_element(By.ID, '__media__single_image')
         )
     input_single_image.send_keys(download_to_selenium(driver, product_files.main_img_url))
-
+    db_tools.set_status(product.prefix, 'Set gallery images')
     input_photo_gallery = driver.find_element(By.ID, '__media__photo_gallery_2')
     for gallery_img in product_files.gallery_urls:
         input_photo_gallery.send_keys(download_to_selenium(driver, gallery_img).replace('|', '_'))
@@ -537,101 +536,142 @@ def new_freebie(
         product_files: schemas.ProductFiles
 ):
     logger.debug('get new freebie page')
+    db_tools.set_status(product.prefix, 'Open new freebie page')
     driver.get(PB_NEW_FREEBIE_URL)
     logger.debug('main freebie page')
+    db_tools.set_status(product.prefix, 'Main page')
     freebie_plus_main_tab(driver, product, product_files, PB_NEW_FREEBIE_URL)
     logger.debug('files freebie page')
+    db_tools.set_status(product.prefix, 'Files page')
     files_tab(driver, product_files)
     logger.debug('images freebie page')
+    db_tools.set_status(product.prefix, 'Images page')
     freebie_plus_images_tab(driver, product_files, product)
     logger.debug('retina images freebie page')
+    db_tools.set_status(product.prefix, 'Retina images page')
     freebie_plus_retina_images_tab(driver, product_files, product)
     if product.guest_author and product.guest_author_link:
         logger.debug('make guest authtor')
+        db_tools.set_status(product.prefix, 'Set guest author page')
         freebie_guest_authtor(driver, product)
     logger.debug('categories freebie page')
+    db_tools.set_status(product.prefix, 'Categories page')
     set_categories(driver, product)
     logger.debug('formats freebie page')
+    db_tools.set_status(product.prefix, 'Formats page')
     freebie_plus_formats(driver, product)
     logger.debug('metatags freebie page')
+    db_tools.set_status(product.prefix, 'Metatags page')
     set_metatags(driver, product)
     logger.debug('freebie submit')
+    db_tools.set_status(product.prefix, 'Submiting freebie')
     pr_id = submit(driver)
+    logger.debug('freebie tags')
+    db_tools.set_status(product.prefix, 'Set tags')
     set_tags(driver, product, PB_EDIT_FREEBIE_URL, pr_id)
     logger.debug(f'pr_id={pr_id}')
     logger.debug(f'{PB_EDIT_FREEBIE_URL.format(pr_id=pr_id)}')
     if product.schedule_date and datetime.utcnow().timestamp() < product.schedule_date.timestamp():
+        db_tools.set_status(product.prefix, 'Set product schedule')
         db_tools.add_to_product_schedule(
             product.schedule_date,
             PB_EDIT_FREEBIE_URL.format(pr_id=pr_id),
             product.title,
         )
     else:
+        db_tools.set_status(product.prefix, 'Make push')
         make_push(driver, pr_id, PB_LIST_FREEBIE_URL)
 
 
 def new_plus(driver: Remote, product: schemas.UploadPlus, product_files: schemas.ProductFiles):
     logger.debug('get new plus page')
+    db_tools.set_status(product.prefix, 'Open new plus page')
     driver.get(PB_NEW_PLUS_URL)
     logger.debug('main plus page')
+    db_tools.set_status(product.prefix, 'Main page')
     freebie_plus_main_tab(driver, product, product_files, PB_NEW_PLUS_URL, is_freebie=False)
     logger.debug('files plus page')
+    db_tools.set_status(product.prefix, 'Files page')
     files_tab(driver, product_files)
     logger.debug('images plus page')
+    db_tools.set_status(product.prefix, 'Images page')
     freebie_plus_images_tab(driver, product_files, product)
     logger.debug('retina images plus page')
+    db_tools.set_status(product.prefix, 'Retina images page')
     freebie_plus_retina_images_tab(driver, product_files, product)
     if product.guest_author and product.guest_author_link:
+        db_tools.set_status(product.prefix, 'Set guest author page')
         logger.debug('make guest authtor')
         plus_guest_authtor(driver, product)
     logger.debug('categories plus page')
+    db_tools.set_status(product.prefix, 'Categories page')
     set_categories(driver, product)
     logger.debug('formats plus page')
+    db_tools.set_status(product.prefix, 'Formats page')
     freebie_plus_formats(driver, product)
     logger.debug('metatags plus page')
+    db_tools.set_status(product.prefix, 'Metatags page')
     set_metatags(driver, product)
     logger.debug('plus submit')
+    db_tools.set_status(product.prefix, 'Submiting plus')
     pr_id = submit(driver)
+    db_tools.set_status(product.prefix, 'Set tags')
     set_tags(driver, product, PB_EDIT_PLUS_URL, pr_id)
     if product.schedule_date and datetime.utcnow() < product.schedule_date:
+        db_tools.set_status(product.prefix, 'Set product schedule')
         db_tools.add_to_product_schedule(
             product.schedule_date,
             PB_EDIT_PLUS_URL.format(pr_id=pr_id),
             product.title,
         )
     else:
+        db_tools.set_status(product.prefix, 'Make push')
         make_push(driver, pr_id, PB_LIST_PLUS_URL)
 
 
 def new_prem(driver: Remote, product: schemas.UploadPrem, product_files: schemas.ProductFiles):
     logger.debug('get new prem page')
+    db_tools.set_status(product.prefix, 'Open new prem page')
     driver.get(PB_NEW_PREM_URL)
     logger.debug('main prem page')
+    db_tools.set_status(product.prefix, 'Main page')
     prem_main_tab(driver, product, product_files, PB_NEW_PREM_URL)
     logger.debug('files prem page')
+    db_tools.set_status(product.prefix, 'Files page')
     files_tab(driver, product_files)
     logger.debug('images prem page')
+    db_tools.set_status(product.prefix, 'Images page')
     prem_images_tab(driver, product_files, product)
     logger.debug('retina prem plus page')
+    db_tools.set_status(product.prefix, 'Retina images page')
     prem_single_page(driver, product)
     logger.debug('categories prem page')
+    db_tools.set_status(product.prefix, 'Categories page')
     set_categories(driver, product)
     logger.debug('formats prem page')
+    db_tools.set_status(product.prefix, 'Formats page')
     set_prem_features(driver, product)
+    logger.debug('compatibilities prem page')
+    db_tools.set_status(product.prefix, 'Compatibilities page')
     set_compatibilities(driver, product)
     logger.debug('metatags prem page')
+    db_tools.set_status(product.prefix, 'Metatags page')
     set_metatags(driver, product)
     logger.debug('plus submit')
+    db_tools.set_status(product.prefix, 'Submiting prem')
     pr_id = submit(driver)
+    db_tools.set_status(product.prefix, 'Set tags')
     set_tags(driver, product, PB_EDIT_PREM_URL, pr_id)
     logger.debug(f'pr_id={pr_id}')
     if product.schedule_date and datetime.utcnow() < product.schedule_date:
+        db_tools.set_status(product.prefix, 'Set product schedule')
         db_tools.add_to_product_schedule(
             product.schedule_date,
             PB_EDIT_PREM_URL.format(pr_id=pr_id),
             product.title,
         )
     else:
+        db_tools.set_status(product.prefix, 'Make push')
         make_push(driver, pr_id, PB_LIST_PREM_URL)
 
 

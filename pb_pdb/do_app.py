@@ -13,6 +13,8 @@ DO_SPACE_ENDPOINT = os.environ.get('DO_SPACE_ENDPOINT', '')
 DO_SPACE_KEY = os.environ.get('DO_SPACE_KEY', '')
 DO_SPACE_SECRET = os.environ.get('DO_SPACE_SECRET', '')
 DO_SPACE_BUCKET = os.environ.get('DO_SPACE_BUCKET', '')
+DO_TRY_COUNT = 6
+
 
 class DOApp:
     def __init__(self, **envs) -> None:
@@ -50,13 +52,17 @@ class DOApp:
 
     def _get_app_url(self):
         url = ''
-        while not url:
+        try_count = 0
+        while not url and try_count < DO_TRY_COUNT:
+            try_count += 1
             sleep(10)
             resp = self._do_req('get', 'apps')
             for app_info in json.loads(resp.content)['apps']:
                 if app_info['id'] == self.id and app_info.get('live_url_base'):
                     url = app_info['live_url_base']
                     break
+        if not url:
+            raise Exception('Can not get app url')
         self.url = url
 
     def _do_req(self, type_req, end_point, payloads=None) -> requests.Response:

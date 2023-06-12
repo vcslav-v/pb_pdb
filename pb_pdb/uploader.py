@@ -15,11 +15,17 @@ def to_pb_freebie(product: schemas.UploadFreebie):
     )
     db_tools.set_status(product.prefix, 'Image preparing')
     product_files = graphic_tool.prepare_imgs(product, product_files)
-    with browser.Browser() as chrome:
-        driver = chrome.driver
-        db_tools.set_status(product.prefix, 'Uploading to PB')
-        uploaders.pb.freebie(driver, product, product_files)
+    try:
+        chrome = browser.Browser()
+    except Exception as e:
+        logger.error(e)
+        db_tools.set_status(product.prefix, 'Error')
+        return
+    driver = chrome.driver
+    db_tools.set_status(product.prefix, 'Uploading to PB')
+    uploaders.pb.freebie(driver, product, product_files)
     db_tools.set_status(product.prefix, 'Uploaded to PB')
+    chrome.close()
 
 
 @logger.catch
@@ -34,11 +40,17 @@ def to_pb_plus(product: schemas.UploadPlus):
     )
     db_tools.set_status(product.prefix, 'Image preparing')
     product_files = graphic_tool.prepare_imgs(product, product_files)
-    with browser.Browser() as chrome:
-        driver = chrome.driver
-        db_tools.set_status(product.prefix, 'Uploading to PB')
-        uploaders.pb.plus(driver, product, product_files)
+    try:
+        chrome = browser.Browser()
+    except Exception as e:
+        logger.error(e)
+        db_tools.set_status(product.prefix, 'Error')
+        return
+    driver = chrome.driver
+    db_tools.set_status(product.prefix, 'Uploading to PB')
+    uploaders.pb.plus(driver, product, product_files)
     db_tools.set_status(product.prefix, 'Uploaded to PB')
+    chrome.close()
 
 
 @logger.catch
@@ -53,11 +65,17 @@ def to_pb_prem(product: schemas.UploadPrem):
     )
     db_tools.set_status(product.prefix, 'Image preparing')
     product_files = graphic_tool.prepare_imgs(product, product_files)
-    with browser.Browser() as chrome:
-        driver = chrome.driver
-        db_tools.set_status(product.prefix, 'Uploading to PB')
-        uploaders.pb.prem(driver, product, product_files)
+    try:
+        chrome = browser.Browser()
+    except Exception as e:
+        logger.error(e)
+        db_tools.set_status(product.prefix, 'Error')
+        return
+    driver = chrome.driver
+    db_tools.set_status(product.prefix, 'Uploading to PB')
+    uploaders.pb.prem(driver, product, product_files)
     db_tools.set_status(product.prefix, 'Uploaded to PB')
+    chrome.close()
 
 
 @logger.catch
