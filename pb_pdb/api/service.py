@@ -7,7 +7,7 @@ def upload_product(product: schemas.UploadProduct, market: str, pr_type: str = N
         try:
             uploader.to_pb_freebie(product)
         except Exception:
-            db_tools.set_status(product.prefix, 'PB_Error')
+            db_tools.set_status(product.prefix, 'Error')
         else:
             db_tools.set_status(product.prefix, 'Done')
 
@@ -16,7 +16,7 @@ def upload_product(product: schemas.UploadProduct, market: str, pr_type: str = N
         try:
             uploader.to_pb_plus(product)
         except Exception:
-            db_tools.set_status(product.prefix, 'PB_Error')
+            db_tools.set_status(product.prefix, 'Error')
         else:
             db_tools.set_status(product.prefix, 'Done')
 
@@ -25,6 +25,6 @@ def upload_product(product: schemas.UploadProduct, market: str, pr_type: str = N
         try:
             uploader.to_pb_prem(product)
         except Exception:
-            db_tools.set_status(product.prefix, 'PB_Error')
+            db_tools.set_status(product.prefix, 'Error')
         else:
             db_tools.set_status(product.prefix, 'Done')
