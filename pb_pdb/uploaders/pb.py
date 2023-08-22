@@ -119,8 +119,8 @@ def freebie_plus_main_tab(
     select_status_element = Select(status_select)
     select_status_element.select_by_visible_text(status)
 
-    short_desc_area = driver.find_element(By.ID, 'short_description')
-    short_desc_area.send_keys(product.excerpt)
+    # short_desc_area = driver.find_element(By.ID, 'short_description')
+    # short_desc_area.send_keys(product.excerpt)
 
     send_source_html_to_wysiwyg(
         driver,
@@ -179,8 +179,8 @@ def prem_main_tab(
     select_status_element = Select(status_select)
     select_status_element.select_by_visible_text(status)
 
-    short_desc_area = driver.find_element(By.ID, 'short_description')
-    short_desc_area.send_keys(product.excerpt)
+    # short_desc_area = driver.find_element(By.ID, 'short_description')
+    # short_desc_area.send_keys(product.excerpt)
 
     if product.sale_standart_price is not None:
         input_std_price = driver.find_element(By.ID, 'price_standard')
@@ -319,13 +319,13 @@ def prem_single_page(driver, product: schemas.UploadPrem):
     tab = driver.find_element(By.XPATH, '//div[@dusk="single-page-text-tab"]')
     tab.click()
 
-    short_desc_area = WebDriverWait(driver, timeout=20).until(
-        lambda d: d.find_element(
-            By.XPATH,
-            '//div[@label="Single page (text)"]//textarea[@id="short_description"]'
-        )
-    )
-    short_desc_area.send_keys(product.excerpt)
+    # short_desc_area = WebDriverWait(driver, timeout=20).until(
+    #     lambda d: d.find_element(
+    #         By.XPATH,
+    #         '//div[@label="Single page (text)"]//textarea[@id="short_description"]'
+    #     )
+    # )
+    # short_desc_area.send_keys(product.excerpt)
 
     send_source_html_to_wysiwyg(
         driver,

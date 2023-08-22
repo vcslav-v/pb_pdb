@@ -75,7 +75,7 @@ class UploadProduct(BaseModel):
     product_file_name: str
     title: str
     slug: str
-    excerpt: str
+    excerpt: Optional[str]
     size: str
     description: str
     date_upload: datetime
