@@ -28,7 +28,6 @@ class Product(Base):
     dropbox_share_url = Column(Text)
     trello_link = Column(Text)
 
-
     designer_id = Column(Integer, ForeignKey('employees.id'))
     designer = relationship('Employee')
 
