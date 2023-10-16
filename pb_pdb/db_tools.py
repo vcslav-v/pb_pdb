@@ -7,6 +7,8 @@ from sqlalchemy import and_
 from pb_pdb import dropbox_tools, models, schemas
 from pb_pdb.db import SessionLocal
 
+from loguru import logger
+
 PRODUCTS_ON_PAGE = 10
 
 
@@ -165,6 +167,7 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
                     result.products[-1].children[-1].end_designer_date = child.end_production_date
     return result
 
+
 def get_products_done() -> list[str]:
     with SessionLocal() as session:
         db_products = session.query(models.Product).filter_by(done=True).all()
@@ -172,6 +175,7 @@ def get_products_done() -> list[str]:
         for db_product in db_products:
             resutl.append(db_product.trello_card_id)
     return resutl
+
 
 def get_common_data() -> schemas.ProductPageData:
     with SessionLocal() as session:
@@ -194,6 +198,7 @@ def get_common_data() -> schemas.ProductPageData:
             )
     return page 
 
+
 def production_end(card_id: str):
     with SessionLocal() as session:
         db_product = session.query(models.Product).filter_by(
@@ -201,6 +206,7 @@ def production_end(card_id: str):
         ).first()
         db_product.end_production_date = datetime.utcnow().date()
         session.commit()
+
 
 def set_status(prefix: str, status: str):
     with SessionLocal() as session:
@@ -214,6 +220,7 @@ def set_status(prefix: str, status: str):
             session.add(db_upload_status)
         db_upload_status.status = status
         session.commit()
+
 
 def get_status(prefix: str):
     with SessionLocal() as session:
@@ -235,6 +242,7 @@ def add_to_product_schedule(schedule_date: datetime, edit_url: str, title: str):
         session.add(new_row)
         session.commit()
 
+
 def rm_product_schedule(id: int):
     with SessionLocal() as session:
         product_row = session.query(models.ProductSchedule).filter_by(
@@ -243,6 +251,7 @@ def rm_product_schedule(id: int):
         session.delete(product_row)
         session.commit()
 
+
 def update_product_schedule(id: int, date_time: datetime):
     with SessionLocal() as session:
         product_row = session.query(models.ProductSchedule).filter_by(
@@ -250,6 +259,7 @@ def update_product_schedule(id: int, date_time: datetime):
         ).first()
         product_row.date_time = date_time
         session.commit()
+
 
 def get_product_schedule(publish_date_time: datetime = None):
     with SessionLocal() as session:
@@ -263,6 +273,7 @@ def get_product_schedule(publish_date_time: datetime = None):
             ).all()
         return schedule
 
+
 def set_uploader_callback(callback_data: schemas.UploaderResponse, prefix: str):
     with SessionLocal() as session:
         callback = models.Callback(
@@ -272,6 +283,7 @@ def set_uploader_callback(callback_data: schemas.UploaderResponse, prefix: str):
         session.add(callback)
         session.commit()
 
+
 def get_callback_data(prefix: str):
     with SessionLocal() as session:
         callback = session.query(models.Callback).filter_by(
@@ -280,10 +292,27 @@ def get_callback_data(prefix: str):
         if callback:
             return callback.data
 
+
 def rm_callback(prefix: str):
     with SessionLocal() as session:
         callback = session.query(models.Callback).filter_by(
             prefix=prefix
         ).first()
         session.delete(callback)
+        session.commit()
+
+
+def set_covers():
+    with SessionLocal() as session:
+        query = session.query(models.Product)
+        query = query.filter(models.Product.end_production_date == None)
+        query = query.filter(models.Product.cover == None)
+        products = query.all()
+        for product in products:
+            try:
+                product.cover = dropbox_tools.get_cover_file_content(product.work_directory)
+            except:
+                continue
+            logger.debug(f'Product {product.id} has cover')
+
         session.commit()

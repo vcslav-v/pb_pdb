@@ -12,7 +12,7 @@ def make_directory(category: str, title: str, full_name: str) -> str:
             dbx.files_create_folder_v2(new_dir_path)
         except Exception:
             raise ValueError(f'folder is exist already - {full_name}')
-        
+
         dbx.files_create_folder_v2(new_dir_path + f'/{title}')
         dbx.files_create_folder_v2(new_dir_path + '/Preview files')
         dbx.files_create_folder_v2(new_dir_path + '/Preview source')
@@ -29,6 +29,24 @@ def get_share_link(path: str) -> str:
         return shared_link.url
 
 
+def get_cover_file_content(path: str) -> str:
+    with dropbox.Dropbox(oauth2_refresh_token=DROPBOX_KEY, app_key=APP_KEY) as dbx:
+        preview_dir = f'{path}/Preview files'
+        files_list = dbx.files_list_folder(preview_dir)
+        files_list = [file._name_value for file in files_list.entries]
+        files_list.sort()
+        preview_file_name = ''
+        for file_name in files_list:
+            if file_name.endswith(('.jpg', '.png', '.jpeg')):
+                preview_file_name = file_name
+                break
+        else:
+            raise ValueError(f'cover is not exist - {path}')
+        preview_path = f'{preview_dir}/{preview_file_name}'
+        _metadata, res = dbx.files_download(preview_path)
+        return res.content
+
+
 def rename(path: str, new_name: str, title: str, old_title: str) -> str:
     new_path = '/'.join(path.split('/')[:-1] + [new_name])
     if path == new_path:
@@ -38,7 +56,7 @@ def rename(path: str, new_name: str, title: str, old_title: str) -> str:
             dbx.files_move_v2(path, new_path)
         except Exception:
             raise ValueError(f'folder is not exist - {new_name}')
-        
+
         old_publish_dir = new_path + f'/{old_title}'
         new_publish_dir = new_path + f'/{title}'
         dbx.files_move_v2(old_publish_dir, new_publish_dir)

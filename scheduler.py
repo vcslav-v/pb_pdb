@@ -7,3 +7,4 @@ if __name__ == '__main__':
     for product in product_schedule:
         uploader.make_live(product.edit_url)
         db_tools.rm_product_schedule(product.id)
+    db_tools.set_covers()
