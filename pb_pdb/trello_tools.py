@@ -10,12 +10,15 @@ from trello import TrelloApi
 from pb_pdb import db_tools, schemas
 from loguru import logger
 
+from datetime import datetime
+
 TRELLO_AUTH_KEY = os.environ.get(
     'TRELLO_AUTH_KEY',
     '',
 )
 TRELLO_APP_KEY = os.environ.get('TRELLO_APP_KEY', '')
 BIG_PRODUCT_LABEL = os.environ.get('BIG_PRODUCT_LABEL', 'The big product')
+END_PRODUCTION_LIST = os.environ.get('END_PRODUCTION_LIST', 'Title, Description')
 
 
 def get_dropbox_link_from_attachs(attachs: list[dict]) -> Optional[str]:
@@ -145,3 +148,18 @@ def make_final_text(card_id: str):
 
 def publish(card_id: str):
     db_tools.publish_product(card_id)
+
+
+def get_end_production_date(card_id):
+    trello = TrelloApi(TRELLO_APP_KEY)
+    trello.set_token(TRELLO_AUTH_KEY)
+    try:
+        card_actions = trello.cards.get_action(card_id)
+    except:
+        return None
+    for action in card_actions:
+        if action['type'] == 'updateCard' and action['data']['listAfter']['name'] == END_PRODUCTION_LIST:
+            break
+    else:
+        return None
+    return datetime.fromisoformat(action['date']).date()

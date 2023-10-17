@@ -4,7 +4,7 @@ from typing import Optional
 
 from sqlalchemy import and_
 
-from pb_pdb import dropbox_tools, models, schemas
+from pb_pdb import dropbox_tools, models, schemas, trello_tools
 from pb_pdb.db import SessionLocal
 from PIL import Image
 import io
@@ -103,6 +103,12 @@ def publish_product(card_id: str):
         db_product = session.query(models.Product).filter_by(
             trello_card_id=card_id
         ).first()
+        if not db_product.end_production_date:
+            end_production_date = trello_tools.get_end_production_date(card_id)
+            if end_production_date:
+                db_product.end_production_date = end_production_date
+            else:
+                db_product.end_production_date = datetime.utcnow().date()
         db_product.end_date = datetime.utcnow().date()
         db_product.done = True
         session.commit()
