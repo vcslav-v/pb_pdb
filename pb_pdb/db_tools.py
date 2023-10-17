@@ -6,10 +6,13 @@ from sqlalchemy import and_
 
 from pb_pdb import dropbox_tools, models, schemas
 from pb_pdb.db import SessionLocal
+from PIL import Image
+import io
 
 from loguru import logger
 
 PRODUCTS_ON_PAGE = 10
+RESIZE_COVER_WIDTH = 640
 
 
 def get_exist_category_from_list(labels: list[str]) -> Optional[str]:
@@ -302,17 +305,34 @@ def rm_callback(prefix: str):
         session.commit()
 
 
+def resize_image_with_max_width(image, max_width):
+    width, height = image.size
+    if width > max_width:
+        ratio = max_width / width
+        new_width = int(width * ratio)
+        new_height = int(height * ratio)
+        return image.resize((new_width, new_height))
+    return image
+
+
 def set_covers():
     with SessionLocal() as session:
         query = session.query(models.Product)
-        query = query.filter(models.Product.end_production_date == None)
+        query = query.filter(models.Product.end_production_date != None)
         query = query.filter(models.Product.cover == None)
-        products = query.all()
+        products: list[models.Product] = query.all()
         for product in products:
             try:
-                product.cover = dropbox_tools.get_cover_file_content(product.work_directory)
+                img_file = io.BytesIO(dropbox_tools.get_cover_file_content(product.work_directory))
             except:
                 continue
+            img = Image.open(img_file)
+            img = resize_image_with_max_width(img, RESIZE_COVER_WIDTH)
+            img = img.convert('RGB')
+            output_image_file = io.BytesIO()
+            img.save(output_image_file, format='JPEG')
+            output_image_file.seek(0)
+            product.cover = output_image_file.getvalue()
             logger.debug(f'Product {product.id} has cover')
 
         session.commit()
