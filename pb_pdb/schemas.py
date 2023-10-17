@@ -24,20 +24,14 @@ class Employee(BaseModel):
 
 
 class ProductInPage(BaseModel):
-    ident: str
+    ident: int
     title: str
-    short_description: str
     designer_name: str
-    designer_id: int
     category: str
-    category_id: int
     trello_link: str
-    dropbox_link: str
-    children: list['ProductInPage'] = []
-    is_done: bool
     start_date: date
-    end_date: Optional[date]
-    end_designer_date: Optional[date]
+    end_production_date: Optional[date]
+    is_big: bool = False
 
 
 class Designer(BaseModel):
@@ -54,7 +48,8 @@ class ProductPage(BaseModel):
     products: list[ProductInPage] = []
     page: int = 1
     number_pages: int = 1
-    number_products: int = 1
+    number_products: int = 0
+    number_big_products: int = 0
 
 
 class ProductPageData(BaseModel):

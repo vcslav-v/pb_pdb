@@ -114,61 +114,53 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
     page_start = PRODUCTS_ON_PAGE * (filter_data.page - 1)
     page_end = PRODUCTS_ON_PAGE * filter_data.page
     with SessionLocal() as session:
-        query = session.query(models.Product).filter_by(parent_id=None)
+        query = session.query(models.Product)
 
         if filter_data.designer_id:
-            query = query.filter_by(designer_id = filter_data.designer_id)
+            query = query.filter_by(designer_id=filter_data.designer_id)
         if filter_data.category_id:
-            query = query.filter_by(category_id = filter_data.category_id)
-        if filter_data.end_design_date_start and filter_data.end_design_date_end:
+            query = query.filter_by(category_id=filter_data.category_id)
+        if not filter_data.end_design_date_start or not filter_data.end_design_date_end:
             query = query.filter(
                 and_(
                     models.Product.end_production_date >= filter_data.end_design_date_start,
                     models.Product.end_production_date <= filter_data.end_design_date_end,
                 )
             )
-        
+        query.order_by(models.Product.end_production_date.desc())
+
         all_db_products = query.count()
         result.number_products = all_db_products
         result.number_pages = ceil(all_db_products / PRODUCTS_ON_PAGE)
         db_products = query.slice(page_start, page_end)
+
+        query = session.query(models.Product).filter_by(is_big_product=True)
+        if filter_data.designer_id:
+            query = query.filter_by(designer_id=filter_data.designer_id)
+        if filter_data.category_id:
+            query = query.filter_by(category_id=filter_data.category_id)
+        if not filter_data.end_design_date_start or not filter_data.end_design_date_end:
+            query = query.filter(
+                and_(
+                    models.Product.end_production_date >= filter_data.end_design_date_start,
+                    models.Product.end_production_date <= filter_data.end_design_date_end,
+                )
+            )
+
+        result.number_big_products = query.count()
+
         for db_product in db_products:
             result.products.append(schemas.ProductInPage(
-                ident = db_product.readable_uid,
-                title = db_product.title if db_product.title else db_product.work_title,
-                short_description = db_product.description[:20] if db_product.description else '',
-                designer_name = db_product.designer.full_name,
-                designer_id = db_product.designer.id,
-                category = db_product.category.name,
-                category_id = db_product.category.id,
-                trello_link = db_product.trello_link,
-                dropbox_link = db_product.dropbox_share_url,
-                is_done = db_product.done,
+                ident=db_product.id,
+                title=db_product.title if db_product.title else db_product.work_title,
+                designer_name=db_product.designer.full_name,
+                category=db_product.category.name,
+                trello_link=db_product.trello_link,
                 start_date=db_product.start_date,
+                is_big=db_product.is_big_product,
             ))
-            if db_product.end_date:
-                result.products[-1].end_date = db_product.end_date
             if db_product.end_production_date:
-                result.products[-1].end_designer_date = db_product.end_production_date
-            db_products_children = session.query(models.Product).filter_by(parent_id=db_product.id).all()
-            for child in db_products_children:
-                result.products[-1].children.append(schemas.ProductInPage(
-                    ident = child.readable_uid,
-                    title = child.title if child.title else child.work_title,
-                    short_description = child.description[:20] if child.description else '',
-                    designer_name = child.designer.full_name,
-                    designer_id = child.designer.id,
-                    category = child.category.name,
-                    category_id = child.category.id,
-                    trello_link = child.trello_link,
-                    dropbox_link = child.dropbox_share_url,
-                    is_done = child.done,
-                    start_date=db_product.start_date,
-                ))
-                if child.end_date:
-                    result.products[-1].children[-1].end_date = child.end_date
-                if child.end_production_date:
-                    result.products[-1].children[-1].end_designer_date = child.end_production_date
+                result.products[-1].end_production_date = db_product.end_production_date
     return result
 
 
