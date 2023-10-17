@@ -329,3 +329,11 @@ def set_covers():
             logger.debug(f'Product {product.id} has cover')
 
         session.commit()
+
+
+def get_product_img(product_id: int):
+    with SessionLocal() as session:
+        product = session.query(models.Product).filter_by(
+            id=product_id
+        ).first()
+        return product.cover

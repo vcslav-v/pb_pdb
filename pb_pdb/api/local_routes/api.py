@@ -26,9 +26,12 @@ def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
     return credentials.username
 
 
-@router.get('/stest')
-def stest(_: str = Depends(get_current_username)):
-    return 'test-test'
+@router.get('/product_img/{product_id}')
+def get_product_img(product_id: int):
+    headers = {
+        'Content-Type': 'image/jpeg',
+    }
+    return Response(db_tools.get_product_img(product_id), headers=headers)
 
 
 @router.get('/add_trello_product')
