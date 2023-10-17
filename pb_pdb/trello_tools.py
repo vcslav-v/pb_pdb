@@ -15,6 +15,7 @@ TRELLO_AUTH_KEY = os.environ.get(
     '',
 )
 TRELLO_APP_KEY = os.environ.get('TRELLO_APP_KEY', '')
+BIG_PRODUCT_LABEL = os.environ.get('BIG_PRODUCT_LABEL', 'The big product')
 
 
 def get_dropbox_link_from_attachs(attachs: list[dict]) -> Optional[str]:
@@ -65,6 +66,7 @@ def add_trello_product(card_id: str):
     product_card = trello.cards.get(card_id)
     _own_id, _parrent_uid, work_title = get_full_name(product_card['name'])
     labels = [label['name'] for label in product_card['labels']]
+    is_big_product = BIG_PRODUCT_LABEL in labels
     category = db_tools.get_exist_category_from_list(labels)
     if not category:
         raise ValueError(f'ERROR Wrong category label - {work_title}')
@@ -87,6 +89,7 @@ def add_trello_product(card_id: str):
         description=description,
         category=category,
         parrent_id=parrent_product,
+        is_big_product=is_big_product,
     )
 
     designer = schemas.Employee(
@@ -133,9 +136,11 @@ def make_final_text(card_id: str):
     trello = TrelloApi(TRELLO_APP_KEY)
     trello.set_token(TRELLO_AUTH_KEY)
     product_card = trello.cards.get(card_id)
+    labels = [label['name'] for label in product_card['labels']]
+    is_big_product = BIG_PRODUCT_LABEL in labels
     description = product_card['desc']
     own_id, parrent_uid, title = get_full_name(product_card['name'])
-    db_tools.make_final_text(card_id, product_card['name'], title, description)
+    db_tools.make_final_text(card_id, product_card['name'], title, description, is_big_product)
 
 
 def publish(card_id: str):
