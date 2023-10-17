@@ -120,7 +120,7 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
             query = query.filter_by(designer_id=filter_data.designer_id)
         if filter_data.category_id:
             query = query.filter_by(category_id=filter_data.category_id)
-        if filter_data.end_design_date_start or filter_data.end_design_date_end:
+        if filter_data.end_design_date_start and filter_data.end_design_date_end:
             query = query.filter(
                 and_(
                     models.Product.end_production_date >= filter_data.end_design_date_start,
