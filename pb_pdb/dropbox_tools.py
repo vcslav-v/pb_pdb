@@ -3,6 +3,7 @@ import os
 
 DROPBOX_KEY = os.environ.get('DROPBOX_KEY', '')
 APP_KEY = os.environ.get('APP_KEY', '')
+BRUSH_APES_CATEGORY = os.environ.get('BRUSH_APES_CATEGORY', 'BRUSH APES')
 
 
 def make_directory(category: str, title: str, full_name: str) -> str:
@@ -13,12 +14,17 @@ def make_directory(category: str, title: str, full_name: str) -> str:
         except Exception:
             raise ValueError(f'folder is exist already - {full_name}')
 
+        is_brush_apes = category == BRUSH_APES_CATEGORY
+
         dbx.files_create_folder_v2(new_dir_path + f'/{title}')
         dbx.files_create_folder_v2(new_dir_path + '/Preview files')
         dbx.files_create_folder_v2(new_dir_path + '/Preview source')
         dbx.files_create_folder_v2(new_dir_path + '/Source images')
-        dbx.files_create_folder_v2(new_dir_path + '/Freepik')
-        dbx.files_create_folder_v2(new_dir_path + '/Adobe')
+        if is_brush_apes:
+            dbx.files_create_folder_v2(new_dir_path + '/Videos')
+        else:
+            dbx.files_create_folder_v2(new_dir_path + '/Freepik')
+            dbx.files_create_folder_v2(new_dir_path + '/Adobe')
 
     return new_dir_path
 
