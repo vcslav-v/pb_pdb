@@ -8,3 +8,4 @@ if __name__ == '__main__':
         uploader.make_live(product.edit_url)
         db_tools.rm_product_schedule(product.id)
     db_tools.set_covers()
+    db_tools.refresh_adobe()

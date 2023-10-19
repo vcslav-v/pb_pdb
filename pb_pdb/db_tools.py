@@ -343,3 +343,12 @@ def get_product_img(product_id: int):
             id=product_id
         ).first()
         return product.cover
+
+
+def refresh_adobe():
+    with SessionLocal() as session:
+        products = session.query(models.Product).all()
+        for product in products:
+            product.adobe_count = dropbox_tools.get_adobe_count(product.work_directory)
+            logger.debug(f'Product {product.readable_uid} has {product.adobe_count} adobe files')
+            session.commit()

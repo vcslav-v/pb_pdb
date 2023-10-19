@@ -124,7 +124,7 @@ def make_subproduct(card_id: str) -> str:
             short_link_cards.append((short_link_card[0], attach['id']))
         else:
             trello.cards.delete_attachment_idAttachment(attach['id'], card_id)
-        
+
 
     for short_link_card, attach_id in short_link_cards:
         card = trello.cards.get(short_link_card)

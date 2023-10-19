@@ -1,5 +1,6 @@
 import dropbox
 import os
+from dropbox.files import FolderMetadata
 
 DROPBOX_KEY = os.environ.get('DROPBOX_KEY', '')
 APP_KEY = os.environ.get('APP_KEY', '')
@@ -67,3 +68,14 @@ def rename(path: str, new_name: str, title: str, old_title: str) -> str:
         new_publish_dir = new_path + f'/{title}'
         dbx.files_move_v2(old_publish_dir, new_publish_dir)
     return new_path
+
+
+def get_adobe_count(path: str) -> int:
+    with dropbox.Dropbox(oauth2_refresh_token=DROPBOX_KEY, app_key=APP_KEY) as dbx:
+        adobe_dir = f'{path}/Adobe'
+        try:
+            files_list = dbx.files_list_folder(adobe_dir)
+        except Exception:
+            return 0
+        folders = [file for file in files_list.entries if isinstance(file, FolderMetadata)]
+        return len(folders)
