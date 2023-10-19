@@ -2,7 +2,7 @@ from datetime import datetime
 from math import ceil
 from typing import Optional
 
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 
 from pb_pdb import dropbox_tools, models, schemas, trello_tools
 from pb_pdb.db import SessionLocal
@@ -155,6 +155,20 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
 
         result.number_big_products = query.count()
 
+        query = session.query(func.sum(models.Product.adobe_count))
+        if filter_data.designer_id:
+            query = query.filter_by(designer_id=filter_data.designer_id)
+        if filter_data.category_id:
+            query = query.filter_by(category_id=filter_data.category_id)
+        if filter_data.end_design_date_start and filter_data.end_design_date_end:
+            query = query.filter(
+                and_(
+                    models.Product.end_production_date >= filter_data.end_design_date_start,
+                    models.Product.end_production_date <= filter_data.end_design_date_end,
+                )
+            )
+        result.total_adobe_count = query.scalar()
+
         for db_product in db_products:
             result.products.append(schemas.ProductInPage(
                 ident=db_product.id,
@@ -164,6 +178,7 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
                 trello_link=db_product.trello_link,
                 start_date=db_product.start_date,
                 is_big=db_product.is_big_product,
+                adobe_count=db_product.adobe_count,
             ))
             if db_product.end_production_date:
                 result.products[-1].end_production_date = db_product.end_production_date

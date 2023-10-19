@@ -32,6 +32,7 @@ class ProductInPage(BaseModel):
     start_date: date
     end_production_date: Optional[date]
     is_big: bool = False
+    adobe_count: int = 0
 
 
 class Designer(BaseModel):
@@ -50,6 +51,7 @@ class ProductPage(BaseModel):
     number_pages: int = 1
     number_products: int = 0
     number_big_products: int = 0
+    total_adobe_count: int = 0
 
 
 class ProductPageData(BaseModel):
