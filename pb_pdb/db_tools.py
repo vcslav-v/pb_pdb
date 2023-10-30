@@ -365,7 +365,7 @@ def refresh_adobe():
         products = session.query(models.Product).all()
         for product in products:
             product.adobe_count = dropbox_tools.get_adobe_count(product.work_directory)
-            if not product.is_big_product:
-                product.adobe_count += 1
+            if not product.is_big_product and product.adobe_count == 0:
+                product.adobe_count = 1
             logger.debug(f'Product {product.readable_uid} has {product.adobe_count} adobe files')
             session.commit()
