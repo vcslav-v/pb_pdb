@@ -1,10 +1,14 @@
 from pb_pdb import (browser, db_tools, graphic_tool, schemas, space_tools,
-                    uploaders, )
+                    uploaders, pb_tools)
 from loguru import logger
 
 
 @logger.catch
 def to_pb_freebie(product: schemas.UploadFreebie):
+    # TODO: refactor after removed tag-category connection
+    db_tools.set_status(product.prefix, 'Preparing tags')
+    pb_tools.check_tags(product.tags, product.categories)
+
     db_tools.set_status(product.prefix, 'Making img urls for upload')
     product_files = space_tools.get_file_urls(product)
     db_tools.set_status(product.prefix, 'Making product urls for upload')
