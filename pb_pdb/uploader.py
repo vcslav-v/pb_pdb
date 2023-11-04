@@ -24,7 +24,7 @@ def to_pb_freebie(product: schemas.UploadFreebie):
     except Exception as e:
         logger.error(e)
         db_tools.set_status(product.prefix, 'Error')
-        return
+        raise e
     driver = chrome.driver
     db_tools.set_status(product.prefix, 'Uploading to PB')
     uploaders.pb.freebie(driver, product, product_files)
@@ -34,6 +34,10 @@ def to_pb_freebie(product: schemas.UploadFreebie):
 
 @logger.catch
 def to_pb_plus(product: schemas.UploadPlus):
+    # TODO: refactor after removed tag-category connection
+    db_tools.set_status(product.prefix, 'Preparing tags')
+    pb_tools.check_tags(product.tags, product.categories)
+
     db_tools.set_status(product.prefix, 'Making img urls for upload')
     product_files = space_tools.get_file_urls(product)
     db_tools.set_status(product.prefix, 'Making product urls for upload')
@@ -59,6 +63,10 @@ def to_pb_plus(product: schemas.UploadPlus):
 
 @logger.catch
 def to_pb_prem(product: schemas.UploadPrem):
+    # TODO: refactor after removed tag-category connection
+    db_tools.set_status(product.prefix, 'Preparing tags')
+    pb_tools.check_tags(product.tags, product.categories)
+
     db_tools.set_status(product.prefix, 'Making img urls for upload')
     product_files = space_tools.get_file_urls(product)
     db_tools.set_status(product.prefix, 'Making product urls for upload')

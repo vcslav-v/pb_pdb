@@ -12,8 +12,6 @@ class Browser:
         browser_options.experimental_options["prefs"] = chrome_prefs
         browser_options.add_argument('--kiosk')
         browser_options.set_capability('browserName', 'chrome')
-        browser_options.set_capability('enableVNC', False)
-        browser_options.set_capability('enableVideo', False)
 
         self.driver = webdriver.Remote(
             command_executor=self.app_instance.url,

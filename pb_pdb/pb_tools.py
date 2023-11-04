@@ -13,7 +13,7 @@ def check_tags(tag_names: list[str], category_names: list[str]):
     pb_categories: list[pb_admin.schemas.Cattegory] = pb_session.categories.get_list()
 
     existed_tag_names = [tag.name for tag in pb_tags if tag.name in tag_names]
-    existed_tags = [tag for tag in pb_tags if tag.name in tag_names]
+    existed_tags = [pb_session.tags.get(tag.ident) for tag in pb_tags if tag.name in tag_names]
     new_tags = [tag_name for tag_name in tag_names if tag_name not in existed_tag_names]
     for new_tag in new_tags:
         pb_session.tags.create(pb_admin.schemas.Tag(
