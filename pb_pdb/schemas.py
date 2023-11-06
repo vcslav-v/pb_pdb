@@ -86,7 +86,7 @@ class UploadProduct(BaseModel):
 
 class UploadFreebie(UploadProduct):
     download_by_email: bool = False
-    meta_title: Optional[str]= None
+    meta_title: Optional[str] = None
     meta_description: Optional[str] = None
 
     @validator('meta_title', pre=True, always=True)
@@ -99,7 +99,7 @@ class UploadFreebie(UploadProduct):
 
 
 class UploadPlus(UploadProduct):
-    meta_title: Optional[str]
+    meta_title: Optional[str] = None
     meta_description: Optional[str] = None
 
     @validator('meta_title', pre=True, always=True)
