@@ -2,6 +2,7 @@ import pb_admin
 import os
 from pb_pdb import schemas, db_tools
 from loguru import logger
+from time import sleep
 
 SITE_URL = os.environ.get('SITE_URL', '')
 LOGIN_PB = os.environ.get('LOGIN_PB', '')
@@ -54,6 +55,7 @@ def bulk_add_tag(task: schemas.BulkTag):
             category_ids=[task.category_id]
         ))
     for product in task.products:
+        sleep(0.5)
         _product = pb_session.products.get(product.ident, product.product_type)
         if task.category_id not in _product.category_ids:
             continue
