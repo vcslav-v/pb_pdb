@@ -119,3 +119,13 @@ class Callback(Base):
     id = Column(Integer, primary_key=True)
     prefix = Column(Text, unique=True)
     data = Column(Text)
+
+
+class BulkTagTask(Base):
+    '''Bulk tag task.'''
+
+    __tablename__ = 'bulk_tag_task'
+
+    id = Column(Integer, primary_key=True)
+    value = Column(Text)
+    in_progress = Column(Boolean, default=False)

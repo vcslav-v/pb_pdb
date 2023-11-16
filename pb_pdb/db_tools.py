@@ -369,3 +369,43 @@ def refresh_adobe():
                 product.adobe_count = 1
             logger.debug(f'Product {product.readable_uid} has {product.adobe_count} adobe files')
             session.commit()
+
+
+def set_bulk_tag_task(task: schemas.BulkTag):
+    with SessionLocal() as session:
+        session.add(models.BulkTagTask(
+            value=task.model_dump_json(),
+        ))
+        session.commit()
+
+
+def get_bulk_tag_task():
+    with SessionLocal() as session:
+        active_task = session.query(models.BulkTagTask).filter_by(
+            in_progress=True
+        ).first()
+        if active_task:
+            return
+        task = session.query(models.BulkTagTask).filter_by(
+            in_progress=False
+        ).first()
+        if task:
+            task.in_progress = True
+            session.commit()
+            result = schemas.BulkTag.model_validate_json(task.value)
+            result.db_id = task.id
+            return result
+
+
+def rm_bulk_tag_task(db_id: int):
+    with SessionLocal() as session:
+        task = session.query(models.BulkTagTask).filter_by(
+            id=db_id
+        ).first()
+        session.delete(task)
+        session.commit()
+
+
+def get_bulk_tag_count_tasks() -> int:
+    with SessionLocal() as session:
+        return session.query(models.BulkTagTask).count()

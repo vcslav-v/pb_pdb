@@ -7,6 +7,7 @@ from loguru import logger
 from pb_pdb import schemas, trello_tools, db_tools
 from pb_pdb.api import service
 
+
 router = APIRouter()
 security = HTTPBasic()
 
@@ -158,3 +159,20 @@ def get_product_schedule(_: str = Depends(get_current_username)):
         ) for task in db_result]
     )
     return result
+
+
+@router.post('/set_bulk_tag')
+@logger.catch
+def set_bulk_tag(
+    data: schemas.BulkTag,
+    _: str = Depends(get_current_username)
+):
+    db_tools.set_bulk_tag_task(data)
+
+
+@router.get('/bulk_tag_count_tasks')
+@logger.catch
+def bulk_tag_count_tasks(
+    _: str = Depends(get_current_username)
+) -> int:
+    return db_tools.get_bulk_tag_count_tasks()

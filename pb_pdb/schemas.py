@@ -2,6 +2,7 @@
 from pydantic import BaseModel, validator
 from typing import Optional
 from datetime import date, datetime
+from pb_admin import schemas as pb_schemas
 
 
 class Product(BaseModel):
@@ -159,3 +160,10 @@ class ProductsSchedule(ScheduleUpdate):
 
 class PageProductsSchedule(BaseModel):
     page: list[ProductsSchedule] = []
+
+
+class BulkTag(BaseModel):
+    tag: str
+    products: list[pb_schemas.Product]
+    category_id: int
+    db_id: Optional[int] = None

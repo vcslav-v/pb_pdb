@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "fast scheluder",
+            "type": "python",
+            "request": "launch",
+            "program": "fast_scheluder.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "scheluder",
             "type": "python",
             "request": "launch",
