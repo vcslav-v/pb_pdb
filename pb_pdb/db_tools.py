@@ -409,3 +409,12 @@ def rm_bulk_tag_task(db_id: int):
 def get_bulk_tag_count_tasks() -> int:
     with SessionLocal() as session:
         return session.query(models.BulkTagTask).count()
+
+
+def deactivate_bulk_tag_task(db_id: int):
+    with SessionLocal() as session:
+        task = session.query(models.BulkTagTask).filter_by(
+            id=db_id
+        ).first()
+        task.in_progress = False
+        session.commit()
