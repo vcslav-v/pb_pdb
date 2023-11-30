@@ -87,7 +87,7 @@ def make_final_text(card_id: str, card_name: str, title: str, description: str, 
         ).first()
         new_path = dropbox_tools.rename(
             db_product.work_directory,
-            card_name, 
+            card_name,
             title,
             db_product.work_title,
         )
@@ -213,7 +213,7 @@ def get_common_data() -> schemas.ProductPageData:
                     name=db_category.name,
                 )
             )
-    return page 
+    return page
 
 
 def production_end(card_id: str):

@@ -23,6 +23,7 @@ def get_save_s3_obj(s3_objs: list[dict], filename: str, prefix, required=True, m
         return []
     return result[0]['Key']
 
+
 def get_s3_link(client, key):
     return client.generate_presigned_url(
         ClientMethod='get_object',

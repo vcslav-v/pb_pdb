@@ -1,5 +1,5 @@
 """Pydantic's models."""
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, computed_field
 from typing import Optional
 from datetime import date, datetime
 from pb_admin import schemas as pb_schemas
@@ -87,29 +87,29 @@ class UploadProduct(BaseModel):
 
 class UploadFreebie(UploadProduct):
     download_by_email: bool = False
-    meta_title: Optional[str] = None
-    meta_description: Optional[str] = None
 
-    @validator('meta_title', pre=True, always=True)
-    def template_meta_title(cls, v, values, **kwargs):
-        return f'Download {values["title"]}'
+    @computed_field
+    @property
+    def meta_title(self) -> str:
+        return f'Download {self.title}'
 
-    @validator('meta_description', pre=True, always=True)
-    def template_meta_description(cls, v, values, **kwargs):
-        return values['excerpt']
+    @computed_field
+    @property
+    def meta_description(self) -> str:
+        return self.excerpt
 
 
 class UploadPlus(UploadProduct):
-    meta_title: Optional[str] = None
-    meta_description: Optional[str] = None
 
-    @validator('meta_title', pre=True, always=True)
-    def template_meta_title(cls, v, values, **kwargs):
-        return values["title"]
+    @computed_field
+    @property
+    def meta_title(self) -> str:
+        return self.title
 
-    @validator('meta_description', pre=True, always=True)
-    def template_meta_description(cls, v, values, **kwargs):
-        return values['excerpt']
+    @computed_field
+    @property
+    def meta_description(self) -> str:
+        return self.excerpt
 
 
 class UploadPrem(UploadProduct):
@@ -118,16 +118,16 @@ class UploadPrem(UploadProduct):
     sale_standart_price: Optional[int] = None
     sale_extended_price: Optional[int] = None
     compatibilities: list[str] = []
-    meta_title: Optional[str] = None
-    meta_description: Optional[str] = None
 
-    @validator('meta_title', pre=True, always=True)
-    def template_meta_title(cls, v, values, **kwargs):
-        return f'Download {values["title"]}'
-    
-    @validator('meta_description', pre=True, always=True)
-    def template_meta_description(cls, v, values, **kwargs):
-        return values['excerpt']
+    @computed_field
+    @property
+    def meta_title(self) -> str:
+        return f'Download {self.title}'
+
+    @computed_field
+    @property
+    def meta_description(self) -> str:
+        return self.excerpt
 
 
 class ProductFiles(BaseModel):
@@ -157,6 +157,7 @@ class ProductsSchedule(ScheduleUpdate):
     ident: int
     name: str
     edit_link: str
+
 
 class PageProductsSchedule(BaseModel):
     page: list[ProductsSchedule] = []

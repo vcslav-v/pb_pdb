@@ -1,4 +1,5 @@
 import pb_admin
+from pb_admin import schemas as pb_schemas
 import os
 from pb_pdb import schemas, db_tools
 from loguru import logger
@@ -38,28 +39,31 @@ def bulk_add_tag(task: schemas.BulkTag):
     if task.category_id not in [category.ident for category in pb_categories]:
         db_tools.rm_bulk_tag_task(task.db_id)
         logger.error(f'Category with id {task.category_id} not found')
-    pb_tags = pb_session.tags.get_list()
+    pb_tags = pb_session.tags.get_list(search=task.tag)
     for pb_tag in pb_tags:
         if pb_tag.name.lower() == task.tag.lower():
-            tag_for_add = pb_session.tags.get(pb_tag.ident)
-            if task.category_id in tag_for_add.category_ids:
-                break
-            else:
-                tag_for_add.category_ids.append(task.category_id)
-                pb_session.tags.update(tag_for_add, is_lite=True)
-                break
+            exist_tag = pb_session.tags.get(pb_tag.ident)
+            break
     else:
-        tag_for_add = pb_session.tags.create(pb_admin.schemas.Tag(
-            name=task.tag,
-            title=task.tag.capitalize(),
-            category_ids=[task.category_id]
-        ))
+        exist_tag = None
+    if exist_tag:
+        tag_for_add = pb_session.tags.fill_scheme_by_policy(exist_tag)
+    else:
+        tag_for_add = pb_session.tags.fill_scheme_by_policy(
+             pb_schemas.Tag(
+                 name=task.tag,
+             )
+        )
+        tag_for_add = pb_session.tags.create(tag_for_add)
+    if task.category_id not in tag_for_add.category_ids:
+        tag_for_add.category_ids.append(task.category_id)
+        pb_session.tags.update(tag_for_add, is_lite=True)
     for product in task.products:
         sleep(0.5)
         _product = pb_session.products.get(product.ident, product.product_type)
         if task.category_id not in _product.category_ids:
             continue
-        if task.tag in _product.tags_ids:
+        if tag_for_add.ident in _product.tags_ids:
             continue
         _product.tags_ids.append(tag_for_add.ident)
         pb_session.products.update(_product, is_lite=True)
