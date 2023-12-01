@@ -48,6 +48,7 @@ def bulk_add_tag(task: schemas.BulkTag):
         exist_tag = None
     if exist_tag:
         tag_for_add = pb_session.tags.fill_scheme_by_policy(exist_tag)
+        pb_session.tags.update(tag_for_add, is_lite=True)
     else:
         tag_for_add = pb_session.tags.fill_scheme_by_policy(
              pb_schemas.Tag(
