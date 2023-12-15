@@ -24,7 +24,7 @@ def make_directory(category: str, title: str, full_name: str) -> str:
         if is_brush_apes:
             dbx.files_create_folder_v2(new_dir_path + '/Videos')
         else:
-            dbx.files_create_folder_v2(new_dir_path + '/Freepik')
+            dbx.files_create_folder_v2(new_dir_path + '/Motion array')
             dbx.files_create_folder_v2(new_dir_path + '/Adobe')
 
     return new_dir_path
