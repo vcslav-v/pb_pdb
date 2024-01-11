@@ -20,16 +20,19 @@ def check_tags(tag_names: list[str], category_names: list[str]):
     existed_tags = [pb_session.tags.get(tag.ident) for tag in pb_tags if tag.name in tag_names]
     new_tags = [tag_name for tag_name in tag_names if tag_name not in existed_tag_names]
     for new_tag in new_tags:
-        pb_session.tags.create(pb_admin.schemas.Tag(
-            name=new_tag,
+        new_tag_by_policy = pb_session.tags.fill_scheme_by_policy(
+            pb_schemas.Tag(
+                name=new_tag,
             title=new_tag.capitalize(),
-            category_ids=[category.ident for category in pb_categories if category.title in category_names]
-        ))
+                category_ids=[category.ident for category in pb_categories if category.title in category_names]
+            )
+        )
+        pb_session.tags.create(new_tag_by_policy)
     for existed_tag in existed_tags:
         tag_category_ids = set(existed_tag.category_ids)
         product_category_ids = set([category.ident for category in pb_categories if category.title in category_names])
         if not tag_category_ids.intersection(product_category_ids):
-            existed_tag.category_ids.extend(list(product_category_ids))
+            existed_tag.category_ids = list(tag_category_ids.union(product_category_ids))
             pb_session.tags.update(existed_tag)
 
 
@@ -69,3 +72,33 @@ def bulk_add_tag(task: schemas.BulkTag):
         _product.tags_ids.append(tag_for_add.ident)
         pb_session.products.update(_product, is_lite=True)
     db_tools.rm_bulk_tag_task(task.db_id)
+
+
+def add_tags(prodect_id: int, product_type: pb_schemas.ProductType, tags: list[str]):
+    pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
+    _product = pb_session.products.get(prodect_id, product_type)
+    pb_tags = pb_session.tags.get_list()
+    for tag in tags:
+        for pb_tag in pb_tags:
+            if pb_tag.name.lower() == tag.lower():
+                exist_tag = pb_session.tags.get(pb_tag.ident)
+                break
+        else:
+            exist_tag = None
+
+        if exist_tag:
+            exist_tag.category_ids = list(set(_product.category_ids).union(set(exist_tag.category_ids)))
+            tag_for_add = pb_session.tags.update(exist_tag)
+        else:
+            tag_for_add = pb_session.tags.fill_scheme_by_policy(
+                 pb_schemas.Tag(
+                     name=tag,
+                     category_ids=_product.category_ids,
+                 )
+            )
+            tag_for_add = pb_session.tags.create(tag_for_add)
+
+        if tag_for_add.ident in _product.tags_ids:
+            continue
+        _product.tags_ids.append(tag_for_add.ident)
+    pb_session.products.update(_product, is_lite=True)

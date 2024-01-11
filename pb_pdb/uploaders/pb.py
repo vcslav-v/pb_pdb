@@ -571,7 +571,7 @@ def new_freebie(
     pr_id = submit(driver)
     logger.debug('freebie tags')
     db_tools.set_status(product.prefix, 'Set tags')
-    set_tags(driver, product, PB_EDIT_FREEBIE_URL, pr_id)
+    pb_tools.add_tags(int(pr_id), pb_schemas.ProductType.freebie, product.tags)
     logger.debug(f'pr_id={pr_id}')
     logger.debug(f'{PB_EDIT_FREEBIE_URL.format(pr_id=pr_id)}')
     if product.schedule_date and datetime.utcnow().timestamp() < product.schedule_date.timestamp():
@@ -619,7 +619,7 @@ def new_plus(driver: Remote, product: schemas.UploadPlus, product_files: schemas
     db_tools.set_status(product.prefix, 'Submiting plus')
     pr_id = submit(driver)
     db_tools.set_status(product.prefix, 'Set tags')
-    set_tags(driver, product, PB_EDIT_PLUS_URL, pr_id)
+    pb_tools.add_tags(int(pr_id), pb_schemas.ProductType.plus, product.tags)
     if product.schedule_date and datetime.utcnow() < product.schedule_date:
         db_tools.set_status(product.prefix, 'Set product schedule')
         db_tools.add_to_product_schedule(
@@ -664,7 +664,7 @@ def new_prem(driver: Remote, product: schemas.UploadPrem, product_files: schemas
     db_tools.set_status(product.prefix, 'Submiting prem')
     pr_id = submit(driver)
     db_tools.set_status(product.prefix, 'Set tags')
-    set_tags(driver, product, PB_EDIT_PREM_URL, pr_id)
+    pb_tools.add_tags(int(pr_id), pb_schemas.ProductType.premium, product.tags)
     logger.debug(f'pr_id={pr_id}')
     if product.schedule_date and datetime.utcnow() < product.schedule_date:
         db_tools.set_status(product.prefix, 'Set product schedule')
