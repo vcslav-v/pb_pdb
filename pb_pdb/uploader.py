@@ -1,97 +1,39 @@
 from pb_pdb import (browser, db_tools, graphic_tool, schemas, space_tools,
                     uploaders, pb_tools)
 from loguru import logger
+from selenium import webdriver
+import os
 
 
 @logger.catch
-def to_pb_freebie(product: schemas.UploadFreebie):
+def to_pb(
+    product: schemas.UploadFreebie | schemas.UploadPlus | schemas.UploadPrem,
+):
     # TODO: refactor after removed tag-category connection
-    db_tools.set_status(product.prefix, 'Preparing tags')
-    pb_tools.check_tags(product.tags, product.categories)
-
     db_tools.set_status(product.prefix, 'Making img urls for upload')
     product_files = space_tools.get_file_urls(product)
     db_tools.set_status(product.prefix, 'Making product urls for upload')
+
+    if isinstance(product, schemas.UploadFreebie):
+        _pr_type = 'freebie'
+    elif isinstance(product, schemas.UploadPlus):
+        _pr_type = 'plus'
+    elif isinstance(product, schemas.UploadPrem):
+        _pr_type = 'premium'
+    else:
+        raise ValueError('Unknown product type')
     product_files.product_url, product_files.product_s3_url = uploaders.pb.make_link_product_file(
         product_files.product_url,
-        'freebie',
+        _pr_type,
         product.prefix
     )
     db_tools.set_status(product.prefix, 'Image preparing')
     product_files = graphic_tool.prepare_imgs(product, product_files)
-    try:
-        chrome = browser.Browser()
-    except Exception as e:
-        logger.error(e)
-        db_tools.set_status(product.prefix, 'Error')
-        raise e
-    driver = chrome.driver
     db_tools.set_status(product.prefix, 'Uploading to PB')
-    uploaders.pb.freebie(driver, product, product_files)
+    uploaders.pb.upload_product(product, product_files)
     db_tools.set_status(product.prefix, 'Uploaded to PB')
-    chrome.close()
-
-
-@logger.catch
-def to_pb_plus(product: schemas.UploadPlus):
-    # TODO: refactor after removed tag-category connection
-    db_tools.set_status(product.prefix, 'Preparing tags')
-    pb_tools.check_tags(product.tags, product.categories)
-
-    db_tools.set_status(product.prefix, 'Making img urls for upload')
-    product_files = space_tools.get_file_urls(product)
-    db_tools.set_status(product.prefix, 'Making product urls for upload')
-    product_files.product_url, product_files.product_s3_url = uploaders.pb.make_link_product_file(
-        product_files.product_url,
-        'plus',
-        product.prefix,
-    )
-    db_tools.set_status(product.prefix, 'Image preparing')
-    product_files = graphic_tool.prepare_imgs(product, product_files)
-    try:
-        chrome = browser.Browser()
-    except Exception as e:
-        logger.error(e)
-        db_tools.set_status(product.prefix, 'Error')
-        return
-    driver = chrome.driver
-    db_tools.set_status(product.prefix, 'Uploading to PB')
-    uploaders.pb.plus(driver, product, product_files)
-    db_tools.set_status(product.prefix, 'Uploaded to PB')
-    chrome.close()
-
-
-@logger.catch
-def to_pb_prem(product: schemas.UploadPrem):
-    # TODO: refactor after removed tag-category connection
-    db_tools.set_status(product.prefix, 'Preparing tags')
-    pb_tools.check_tags(product.tags, product.categories)
-
-    db_tools.set_status(product.prefix, 'Making img urls for upload')
-    product_files = space_tools.get_file_urls(product)
-    db_tools.set_status(product.prefix, 'Making product urls for upload')
-    product_files.product_url, product_files.product_s3_url = uploaders.pb.make_link_product_file(
-        product_files.product_url,
-        'premium',
-        product.prefix
-    )
-    db_tools.set_status(product.prefix, 'Image preparing')
-    product_files = graphic_tool.prepare_imgs(product, product_files)
-    try:
-        chrome = browser.Browser()
-    except Exception as e:
-        logger.error(e)
-        db_tools.set_status(product.prefix, 'Error')
-        return
-    driver = chrome.driver
-    db_tools.set_status(product.prefix, 'Uploading to PB')
-    uploaders.pb.prem(driver, product, product_files)
-    db_tools.set_status(product.prefix, 'Uploaded to PB')
-    chrome.close()
 
 
 @logger.catch
 def make_live(edit_link: str):
-    with browser.Browser() as chrome:
-        driver = chrome.driver
-        uploaders.pb.make_live(driver, edit_link)
+    uploaders.pb.make_live(edit_link)

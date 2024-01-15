@@ -1,5 +1,7 @@
 from pb_pdb import schemas, do_app
 from boto3 import session as s3_session
+from urllib.parse import urlparse
+
 
 
 def get_save_s3_obj(s3_objs: list[dict], filename: str, prefix, required=True, multitude=False):
@@ -85,3 +87,7 @@ def save_to_space(data: str, prefix: str, new_name: str):
         ContentType='application/octet-stream',
     )
     return get_s3_link(client, key)
+
+
+def get_filename_from_url(url: str):
+    return urlparse(url).path.split('/')[-1]
