@@ -14,7 +14,7 @@ LOGIN_PB = os.environ.get('LOGIN_PB', '')
 PASS_PB = os.environ.get('PASS_PB', '')
 
 
-def get_valid_tags_ids(tag_names: list[str], category_ids: list[int]) -> list[int]:
+def get_valid_tags_ids(tag_names: list[str]) -> list[int]:
     tag_names = [tag_name.lower() for tag_name in tag_names]
     pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
     result = []
@@ -22,18 +22,12 @@ def get_valid_tags_ids(tag_names: list[str], category_ids: list[int]) -> list[in
         pb_tags = pb_session.tags.get_list(search=tag_name)
         for pb_tag in pb_tags:
             if pb_tag.name.lower() == tag_name.lower():
-                exist_tag = pb_session.tags.get(pb_tag.ident)
+                tag_for_add = pb_session.tags.get(pb_tag.ident)
                 break
-        else:
-            exist_tag = None
-        if exist_tag:
-            exist_tag.category_ids = list(set(category_ids).union(set(exist_tag.category_ids)))
-            tag_for_add = pb_session.tags.update(exist_tag)
         else:
             tag_for_add = pb_session.tags.fill_scheme_by_policy(
                  pb_schemas.Tag(
                      name=tag_name,
-                     category_ids=category_ids,
                  )
             )
             tag_for_add = pb_session.tags.create(tag_for_add)
@@ -43,20 +37,13 @@ def get_valid_tags_ids(tag_names: list[str], category_ids: list[int]) -> list[in
 
 def bulk_add_tag(task: schemas.BulkTag):
     pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
-    pb_categories = pb_session.categories.get_list()
-    if task.category_id not in [category.ident for category in pb_categories]:
-        db_tools.rm_bulk_tag_task(task.db_id)
-        logger.error(f'Category with id {task.category_id} not found')
     pb_tags = pb_session.tags.get_list(search=task.tag)
     for pb_tag in pb_tags:
         if pb_tag.name.lower() == task.tag.lower():
-            exist_tag = pb_session.tags.get(pb_tag.ident)
+            tag_for_add = pb_session.tags.get(pb_tag.ident)
+            tag_for_add = pb_session.tags.fill_scheme_by_policy(tag_for_add)
+            pb_session.tags.update(tag_for_add, is_lite=True)
             break
-    else:
-        exist_tag = None
-    if exist_tag:
-        tag_for_add = pb_session.tags.fill_scheme_by_policy(exist_tag)
-        pb_session.tags.update(tag_for_add, is_lite=True)
     else:
         tag_for_add = pb_session.tags.fill_scheme_by_policy(
              pb_schemas.Tag(
@@ -64,14 +51,9 @@ def bulk_add_tag(task: schemas.BulkTag):
              )
         )
         tag_for_add = pb_session.tags.create(tag_for_add)
-    if task.category_id not in tag_for_add.category_ids:
-        tag_for_add.category_ids.append(task.category_id)
-        pb_session.tags.update(tag_for_add, is_lite=True)
     for product in task.products:
         sleep(0.5)
         _product = pb_session.products.get(product.ident, product.product_type)
-        if task.category_id not in _product.category_ids:
-            continue
         if tag_for_add.ident in _product.tags_ids:
             continue
         _product.tags_ids.append(tag_for_add.ident)
@@ -79,26 +61,19 @@ def bulk_add_tag(task: schemas.BulkTag):
     db_tools.rm_bulk_tag_task(task.db_id)
 
 
-def add_tags(prodect_id: int, product_type: pb_schemas.ProductType, tags: list[str]):
+def add_tags(product_id: int, product_type: pb_schemas.ProductType, tags: list[str]):
     pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
-    _product = pb_session.products.get(prodect_id, product_type)
+    _product = pb_session.products.get(product_id, product_type)
     pb_tags = pb_session.tags.get_list()
     for tag in tags:
         for pb_tag in pb_tags:
             if pb_tag.name.lower() == tag.lower():
-                exist_tag = pb_session.tags.get(pb_tag.ident)
+                tag_for_add = pb_session.tags.get(pb_tag.ident)
                 break
-        else:
-            exist_tag = None
-
-        if exist_tag:
-            exist_tag.category_ids = list(set(_product.category_ids).union(set(exist_tag.category_ids)))
-            tag_for_add = pb_session.tags.update(exist_tag)
         else:
             tag_for_add = pb_session.tags.fill_scheme_by_policy(
                  pb_schemas.Tag(
                      name=tag,
-                     category_ids=_product.category_ids,
                  )
             )
             tag_for_add = pb_session.tags.create(tag_for_add)
@@ -169,7 +144,7 @@ def upload_product(
         raise ValueError('Wrong product type')
 
     category_ids = get_category_ids_by_names(product.categories)
-    tags_ids = get_valid_tags_ids(product.tags, category_ids)
+    tags_ids = get_valid_tags_ids(product.tags)
     new_product = pb_schemas.Product(
         product_type=product_type,
         created_at=product.date_upload,

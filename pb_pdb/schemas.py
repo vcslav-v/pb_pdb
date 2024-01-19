@@ -166,5 +166,4 @@ class PageProductsSchedule(BaseModel):
 class BulkTag(BaseModel):
     tag: str
     products: list[pb_schemas.Product]
-    category_id: int
     db_id: Optional[int] = None
