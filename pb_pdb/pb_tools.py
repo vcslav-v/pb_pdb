@@ -199,6 +199,8 @@ def upload_product(
             )
         ]
         new_product.compatibilities_ids = get_compatibilities_ids_by_names(product.compatibilities)
+        new_product.gallery_images = [new_product.main_image] + new_product.gallery_images
+        new_product.gallery_images_retina = [new_product.main_image_retina] + new_product.gallery_images_retina
 
     pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
     return pb_session.products.create(new_product)
