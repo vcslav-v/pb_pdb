@@ -162,6 +162,7 @@ def upload_product(
         gallery_images=list(map(_make_img_scheme_from_s3_url, product_files.gallery_x2_urls, product.meta_title)),
         gallery_images_retina=list(map(_make_img_scheme_from_s3_url, product_files.gallery_x2_urls, product.meta_title)),
         vps_path=urlparse(product_files.product_url).path.strip('/'),
+        s3_path=urlparse(product_files.product_s3_url).path.strip('/'),
         meta_title=product.meta_title,
         meta_description=product.meta_description,
         category_ids=category_ids,
@@ -174,13 +175,11 @@ def upload_product(
         new_product.author_name = product.guest_author
         new_product.author_url = product.guest_author_link
     elif product_type == pb_schemas.ProductType.plus:
-        new_product.s3_path = urlparse(product_files.product_s3_url).path.strip('/')
         new_product.format_ids = get_format_ids_by_names(product.formats)
         new_product.count_downloads = 3
         new_product.author_name = product.guest_author
         new_product.author_url = product.guest_author_link
     elif product_type == pb_schemas.ProductType.premium:
-        new_product.s3_path = urlparse(product_files.product_s3_url).path.strip('/')
         new_product.standard_price = product.sale_standart_price if product.sale_standart_price else product.standart_price
         new_product.extended_price = product.sale_extended_price if product.sale_extended_price else product.extended_price
         new_product.standard_price_old = product.standart_price if product.sale_standart_price else None

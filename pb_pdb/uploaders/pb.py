@@ -35,7 +35,7 @@ def make_link_product_file(product_url: str, product_type: str, prefix: str):
         data = {
             'upload': product,
             'type': product_type,
-            'load_to_s3': False if product_type == 'freebie' else True,
+            'load_to_s3': True,
             'callback': CALL_BACK_URL.format(prefix=prefix)
         }
         logger.debug(data)
