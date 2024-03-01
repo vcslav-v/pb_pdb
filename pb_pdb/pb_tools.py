@@ -202,7 +202,7 @@ def upload_product(
         new_product.gallery_images_retina = [new_product.main_image_retina] + new_product.gallery_images_retina
 
     pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
-    return pb_session.products.create(new_product)
+    return pb_session.products.create(new_product, edit_mode=True)
 
 
 def make_push(
