@@ -201,8 +201,8 @@ def upload_product(
         new_product.gallery_images = [new_product.main_image] + new_product.gallery_images
         new_product.gallery_images_retina = [new_product.main_image_retina] + new_product.gallery_images_retina
 
-    pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
-    return pb_session.products.create(new_product, edit_mode=True)
+    pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB, edit_mode=True)
+    return pb_session.products.create(new_product)
 
 
 def make_push(
