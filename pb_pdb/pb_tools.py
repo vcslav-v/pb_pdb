@@ -200,7 +200,67 @@ def upload_product(
         new_product.compatibilities_ids = get_compatibilities_ids_by_names(product.compatibilities)
         new_product.gallery_images = [new_product.main_image] + new_product.gallery_images
         new_product.gallery_images_retina = [new_product.main_image_retina] + new_product.gallery_images_retina
-    logger.debug(f'Product scheme: {new_product.model_dump()}')
+    logger.debug(f'''Product scheme:
+                 ident = {new_product.ident}
+                product_type = {new_product.product_type}
+                url = {new_product.url}
+                title = {new_product.title}
+                created_at = {new_product.created_at}
+                slug = {new_product.slug}
+                is_live = {new_product.is_live}
+                size = {new_product.size}
+                show_statistic = {new_product.show_statistic}
+                email_download = {new_product.email_download}
+                count_downloads = {new_product.count_downloads}
+                short_description = {new_product.short_description}
+                description = {new_product.description}
+                thumbnail = {'Field' if new_product.thumbnail else 'None'}
+                thumbnail_retina = {'Field' if new_product.thumbnail_retina else 'None'}
+                premium_thumbnail = {'Field' if new_product.premium_thumbnail else 'None'}
+                premium_thumbnail_retina = {'Field' if new_product.premium_thumbnail_retina else 'None'}
+                push_image = {'Field' if new_product.push_image else 'None'}
+                vps_path = {new_product.vps_path}
+                s3_path = {new_product.s3_path}
+                main_image = {'Field' if new_product.main_image else 'None'}
+                gallery_images = {'Field' if new_product.gallery_images else 'None'}
+                main_image_retina = {'Field' if new_product.main_image_retina else 'None'}
+                gallery_images_retina = {'Field' if new_product.gallery_images_retina else 'None'}
+                author_name = {new_product.author_name}
+                author_url = {new_product.author_url}
+                features = {new_product.features}
+                category_ids = {new_product.category_ids}
+                format_ids = {new_product.format_ids}
+                font_ids = {new_product.font_ids}
+                meta_title = {new_product.meta_title}
+                meta_description = {new_product.meta_description}
+                meta_keywords = {new_product.meta_keywords}
+                tags_ids = {new_product.tags_ids}
+                extended_price = {new_product.extended_price}
+                standard_price = {new_product.standard_price}
+                extended_price_old = {new_product.extended_price_old}
+                standard_price_old = {new_product.standard_price_old}
+                compatibilities_ids = {new_product.compatibilities_ids}
+                inner_short_description = {new_product.inner_short_description}
+                free_sample_link_url = {new_product.free_sample_link_url}
+                free_sample_link_text = {new_product.free_sample_link_text}
+                free_sample_description = {new_product.free_sample_description}
+                live_preview_type = {new_product.live_preview_type}
+                card_title = {new_product.card_title}
+                card_button_link = {new_product.card_button_link}
+                card_button_text = {new_product.card_button_text}
+                card_description = {new_product.card_description}
+                live_preview_link = {new_product.live_preview_link}
+                live_preview_text = {new_product.live_preview_text}
+                button_text = {new_product.button_text}
+                custom_url_title = {new_product.custom_url_title}
+                custom_url = {new_product.custom_url}
+                old_img = {'Field' if new_product.old_img else 'None'}
+                old_img_retina = {'Field' if new_product.old_img_retina else 'None'}
+                download_link_text = {new_product.download_link_text}
+                download_link_url = {new_product.download_link_url}
+                author_id = {new_product.author_id}
+                features_short = {new_product.features_short}
+    ''')
     pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB, edit_mode=True)
     return pb_session.products.create(new_product)
 
