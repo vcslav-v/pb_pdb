@@ -16,7 +16,7 @@ PASS_PB = os.environ.get('PASS_PB', '')
 
 def get_valid_tags_ids(tag_names: list[str]) -> list[int]:
     tag_names = [tag_name.lower() for tag_name in tag_names]
-    pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
+    pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB, edit_mode=True)
     result = []
     for tag_name in tag_names:
         pb_tags = pb_session.tags.get_list(search=tag_name)
