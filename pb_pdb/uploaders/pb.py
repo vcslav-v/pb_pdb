@@ -11,22 +11,14 @@ from datetime import datetime
 from pb_admin import schemas as pb_schemas
 from pb_pdb import schemas, db_tools, pb_tools
 
-LOGIN_PB = os.environ.get('LOGIN_PB', '')
-PASS_PB = os.environ.get('PASS_PB', '')
 PB_UPL_API_LOGIN = os.environ.get('PB_UPL_API_LOGIN', '')
 PB_UPL_API_PASS = os.environ.get('PB_UPL_API_PASS', '')
 PB_UPL_API_URL = os.environ.get('PB_UPL_API_URL', '')
-ADMIN_PB_URL = os.environ.get('ADMIN_PB_URL', '')
-PB_NEW_FREEBIE_URL = os.environ.get('PB_NEW_FREEBIE_URL', '')
-PB_NEW_PLUS_URL = os.environ.get('PB_NEW_PLUS_URL', '')
-PB_NEW_PREM_URL = os.environ.get('PB_NEW_PREM_URL', '')
-PB_LIST_FREEBIE_URL = os.environ.get('PB_LIST_FREEBIE_URL', '')
-PB_LIST_PLUS_URL = os.environ.get('PB_LIST_PLUS_URL', '')
-PB_LIST_PREM_URL = os.environ.get('PB_LIST_PREM_URL', '')
 PB_EDIT_FREEBIE_URL = os.environ.get('PB_EDIT_FREEBIE_URL', '')
 PB_EDIT_PLUS_URL = os.environ.get('PB_EDIT_PLUS_URL', '')
 PB_EDIT_PREM_URL = os.environ.get('PB_EDIT_PREM_URL', '')
 CALL_BACK_URL = os.environ.get('CALL_BACK_URL', '')
+PB_EDIT_URL = os.environ.get('PB_EDIT_URL', '')
 
 
 def make_link_product_file(product_url: str, product_type: str, prefix: str):
