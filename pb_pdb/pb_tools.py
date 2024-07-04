@@ -159,10 +159,14 @@ def upload_product(
         product_type = pb_schemas.NewProductType.freebie
         price_commercial_cent = 0
         price_extended_cent = None if product.guest_author else 4900
+        price_commercial_sale_cent = None
+        price_extended_sale_cent = None
     elif isinstance(product, schemas.UploadPlus):
         product_type = pb_schemas.NewProductType.plus
         price_commercial_cent = 0 if product.guest_author else 1700
         price_extended_cent = None if product.guest_author else 9900
+        price_commercial_sale_cent = None
+        price_extended_sale_cent = None
     elif isinstance(product, schemas.UploadPrem):
         product_type = pb_schemas.NewProductType.premium
         price_commercial_cent = product.standart_price * 100
