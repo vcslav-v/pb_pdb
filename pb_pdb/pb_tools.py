@@ -212,6 +212,7 @@ def upload_product(
         formats=', '.join(product.formats),
         meta_title=product.meta_title,
         meta_description=product.meta_description,
+        meta_keywords=None,
     )
     pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB, edit_mode=True)
     return pb_session.new_products.create(new_product)
