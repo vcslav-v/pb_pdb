@@ -9,7 +9,6 @@ import os
 def to_pb(
     product: schemas.UploadFreebie | schemas.UploadPlus | schemas.UploadPrem,
 ):
-    # TODO: refactor after removed tag-category connection
     db_tools.set_status(product.prefix, 'Making img urls for upload')
     product_files = space_tools.get_file_urls(product)
     db_tools.set_status(product.prefix, 'Making product urls for upload')
@@ -27,8 +26,6 @@ def to_pb(
         _pr_type,
         product.prefix
     )
-    db_tools.set_status(product.prefix, 'Image preparing')
-    product_files = graphic_tool.prepare_imgs(product, product_files)
     db_tools.set_status(product.prefix, 'Uploading to PB')
     uploaders.pb.upload_product(product, product_files)
     db_tools.set_status(product.prefix, 'Uploaded to PB')

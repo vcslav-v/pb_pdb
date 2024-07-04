@@ -133,15 +133,10 @@ class UploadPrem(UploadProduct):
 class ProductFiles(BaseModel):
     product_url: str
     product_s3_url: Optional[str] = None
-    main_img_url: Optional[str] = None
     main_img_x2_url: str
-    gallery_urls: Optional[str] = None
     gallery_x2_urls: list[str]
-    thumbnail_url: Optional[str] = None
     thumbnail_x2_url: str
     push_url: Optional[str] = None
-    prem_thumbnail_url: Optional[str] = None
-    prem_thumbnail_x2_url: Optional[str] = None
 
 
 class UploaderResponse(BaseModel):

@@ -84,15 +84,29 @@ def add_tags(product_id: int, product_type: pb_schemas.ProductType, tags: list[s
     pb_session.products.update(_product, is_lite=True)
 
 
-def get_category_ids_by_names(category_names: list[str]) -> list[int]:
+def get_creator_id_by_name(creator_name: str | None, creator_link: str | None) -> int:
+    if not creator_name or not creator_link:
+        return 1
     pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
-    result = []
+    creators = pb_session.creators.get_list()
+    for creator in creators:
+        if creator.name.lower() == creator_name.lower().strip():
+            return creator.ident
+    new_creator = pb_schemas.Creator(
+        name=creator_name,
+        link=creator_link,
+        description=creator_name,
+    )
+    creator = pb_session.creators.create(new_creator)
+    return creator.ident
+    
+def get_category_id_by_names(category_names: list[str]) -> int | None:
+    pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
     for category_name in category_names:
         pb_categories = pb_session.categories.get_list(category_name)
         for pb_category in pb_categories:
             if pb_category.title.lower() == category_name.lower():
-                result.append(pb_category.ident)
-    return result
+                return pb_category.ident
 
 
 def get_format_ids_by_names(format_names: list[str]) -> list[int]:
@@ -130,139 +144,73 @@ def _make_img_scheme_from_s3_url(url: str, alt: str) -> pb_schemas.Image:
     )
 
 
+def _make_raw_presentation(images: list[pb_admin.schemas.Image]) -> list[list[pb_admin.schemas.ProductLayoutImg | pb_admin.schemas.ProductLayoutVideo]]:
+    result = []
+    for i in range(len(images)):
+        result.append([pb_admin.schemas.ProductLayoutImg(img_n=i)])
+    return result
+
+
 def upload_product(
     product: schemas.UploadFreebie | schemas.UploadPlus | schemas.UploadPrem,
     product_files: schemas.ProductFiles,
 ) -> pb_schemas.Product:
     if isinstance(product, schemas.UploadFreebie):
-        product_type = pb_schemas.ProductType.freebie
+        product_type = pb_schemas.NewProductType.freebie
+        price_commercial_cent = 0
+        price_extended_cent = None if product.guest_author else 4900
     elif isinstance(product, schemas.UploadPlus):
-        product_type = pb_schemas.ProductType.plus
+        product_type = pb_schemas.NewProductType.plus
+        price_commercial_cent = 0 if product.guest_author else 1700
+        price_extended_cent = None if product.guest_author else 9900
     elif isinstance(product, schemas.UploadPrem):
-        product_type = pb_schemas.ProductType.premium
+        product_type = pb_schemas.NewProductType.premium
+        price_commercial_cent = product.standart_price * 100
+        price_extended_cent = product.extended_price * 100
+        price_commercial_sale_cent = product.sale_standart_price * 100
+        price_extended_sale_cent = product.sale_extended_price * 100
     else:
         raise ValueError('Wrong product type')
 
-    category_ids = get_category_ids_by_names(product.categories)
+    category_id = get_category_id_by_names(product.categories)
+    if not category_id:
+        raise ValueError('Category not found')
+    creator_id = get_creator_id_by_name(product.guest_author, product.guest_author_link)
     tags_ids = get_valid_tags_ids(product.tags)
-    new_product = pb_schemas.Product(
-        product_type=product_type,
-        created_at=product.date_upload,
+    images = [
+        _make_img_scheme_from_s3_url(product_files.main_img_x2_url, product.meta_title),
+    ] + [
+        _make_img_scheme_from_s3_url(url, product.meta_title) for url in product_files.gallery_x2_urls
+    ]
+    new_product = pb_schemas.NewProduct(
         title=product.title,
         slug=product.slug,
+        created_at=product.date_upload,
         is_live=False if product.schedule_date else True,
+        product_type=product_type,
+        only_registered_download=product.download_by_email if isinstance(product, schemas.UploadFreebie) else False,
+        creator_id=creator_id,
         size=product.size,
-        short_description=product.excerpt,
+        category_id=category_id,
+        excerpt=product.excerpt,
         description=product.description,
-        thumbnail=_make_img_scheme_from_s3_url(product_files.thumbnail_url, product.meta_title),
-        thumbnail_retina=_make_img_scheme_from_s3_url(product_files.thumbnail_x2_url, product.meta_title),
+        price_commercial_cent=price_commercial_cent,
+        price_extended_cent=price_extended_cent,
+        price_commercial_sale_cent=price_commercial_sale_cent,
+        price_extended_sale_cent=price_extended_sale_cent,
+        thumbnail=_make_img_scheme_from_s3_url(product_files.thumbnail_x2_url, product.meta_title),
         push_image=_make_img_scheme_from_s3_url(product_files.push_url, product.meta_title),
-        main_image=_make_img_scheme_from_s3_url(product_files.main_img_url, product.meta_title),
-        main_image_retina=_make_img_scheme_from_s3_url(product_files.main_img_x2_url, product.meta_title),
-        gallery_images=list(map(_make_img_scheme_from_s3_url, product_files.gallery_x2_urls, product.meta_title)),
-        gallery_images_retina=list(map(_make_img_scheme_from_s3_url, product_files.gallery_x2_urls, product.meta_title)),
+        images=images,
+        presentation=_make_raw_presentation(images),
         vps_path=urlparse(product_files.product_url).path.strip('/'),
         s3_path=urlparse(product_files.product_s3_url).path.strip('/'),
+        tags_ids=tags_ids,
+        formats=', '.join(product.formats),
         meta_title=product.meta_title,
         meta_description=product.meta_description,
-        category_ids=category_ids,
-        tags_ids=tags_ids,
     )
-    if product_type == pb_schemas.ProductType.freebie:
-        new_product.email_download = product.download_by_email
-        new_product.count_downloads = 3
-        new_product.format_ids = get_format_ids_by_names(product.formats)
-        new_product.author_name = product.guest_author
-        new_product.author_url = product.guest_author_link
-    elif product_type == pb_schemas.ProductType.plus:
-        new_product.format_ids = get_format_ids_by_names(product.formats)
-        new_product.count_downloads = 3
-        new_product.author_name = product.guest_author
-        new_product.author_url = product.guest_author_link
-    elif product_type == pb_schemas.ProductType.premium:
-        new_product.standard_price = product.sale_standart_price if product.sale_standart_price else product.standart_price
-        new_product.extended_price = product.sale_extended_price if product.sale_extended_price else product.extended_price
-        new_product.standard_price_old = product.standart_price if product.sale_standart_price else None
-        new_product.extended_price_old = product.extended_price if product.sale_extended_price else None
-        new_product.inner_short_description = product.excerpt
-        new_product.premium_thumbnail = _make_img_scheme_from_s3_url(product_files.thumbnail_url, product.meta_title)
-        new_product.premium_thumbnail_retina = _make_img_scheme_from_s3_url(product_files.thumbnail_x2_url, product.meta_title)
-        new_product.features_short = [
-            pb_admin.schemas.FeatureShort(
-                title='Format',
-                value=', '.join(product.formats),
-            ),
-            pb_admin.schemas.FeatureShort(
-                title='File size',
-                value=product.size,
-            )
-        ]
-        new_product.compatibilities_ids = get_compatibilities_ids_by_names(product.compatibilities)
-        new_product.gallery_images = [new_product.main_image] + new_product.gallery_images
-        new_product.gallery_images_retina = [new_product.main_image_retina] + new_product.gallery_images_retina
-    logger.debug(f'''Product scheme:
-                 ident = {new_product.ident}
-                product_type = {new_product.product_type}
-                url = {new_product.url}
-                title = {new_product.title}
-                created_at = {new_product.created_at}
-                slug = {new_product.slug}
-                is_live = {new_product.is_live}
-                size = {new_product.size}
-                show_statistic = {new_product.show_statistic}
-                email_download = {new_product.email_download}
-                count_downloads = {new_product.count_downloads}
-                short_description = {new_product.short_description}
-                description = {new_product.description}
-                thumbnail = {'Field' if new_product.thumbnail else 'None'}
-                thumbnail_retina = {'Field' if new_product.thumbnail_retina else 'None'}
-                premium_thumbnail = {'Field' if new_product.premium_thumbnail else 'None'}
-                premium_thumbnail_retina = {'Field' if new_product.premium_thumbnail_retina else 'None'}
-                push_image = {'Field' if new_product.push_image else 'None'}
-                vps_path = {new_product.vps_path}
-                s3_path = {new_product.s3_path}
-                main_image = {'Field' if new_product.main_image else 'None'}
-                gallery_images = {'Field' if new_product.gallery_images else 'None'}
-                main_image_retina = {'Field' if new_product.main_image_retina else 'None'}
-                gallery_images_retina = {'Field' if new_product.gallery_images_retina else 'None'}
-                author_name = {new_product.author_name}
-                author_url = {new_product.author_url}
-                features = {new_product.features}
-                category_ids = {new_product.category_ids}
-                format_ids = {new_product.format_ids}
-                font_ids = {new_product.font_ids}
-                meta_title = {new_product.meta_title}
-                meta_description = {new_product.meta_description}
-                meta_keywords = {new_product.meta_keywords}
-                tags_ids = {new_product.tags_ids}
-                extended_price = {new_product.extended_price}
-                standard_price = {new_product.standard_price}
-                extended_price_old = {new_product.extended_price_old}
-                standard_price_old = {new_product.standard_price_old}
-                compatibilities_ids = {new_product.compatibilities_ids}
-                inner_short_description = {new_product.inner_short_description}
-                free_sample_link_url = {new_product.free_sample_link_url}
-                free_sample_link_text = {new_product.free_sample_link_text}
-                free_sample_description = {new_product.free_sample_description}
-                live_preview_type = {new_product.live_preview_type}
-                card_title = {new_product.card_title}
-                card_button_link = {new_product.card_button_link}
-                card_button_text = {new_product.card_button_text}
-                card_description = {new_product.card_description}
-                live_preview_link = {new_product.live_preview_link}
-                live_preview_text = {new_product.live_preview_text}
-                button_text = {new_product.button_text}
-                custom_url_title = {new_product.custom_url_title}
-                custom_url = {new_product.custom_url}
-                old_img = {'Field' if new_product.old_img else 'None'}
-                old_img_retina = {'Field' if new_product.old_img_retina else 'None'}
-                download_link_text = {new_product.download_link_text}
-                download_link_url = {new_product.download_link_url}
-                author_id = {new_product.author_id}
-                features_short = {new_product.features_short}
-    ''')
     pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB, edit_mode=True)
-    return pb_session.products.create(new_product)
+    return pb_session.new_products.create(new_product)
 
 
 def make_push(
@@ -281,8 +229,192 @@ def make_push(
     pb_session.tools.make_push(product_id, product_type)
 
 
-def make_life(product_id: int, product_type: pb_schemas.ProductType):
-    pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
-    product = pb_session.products.get(product_id, product_type)
+def make_life(product_id: int):
+    pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB, edit_mode=True)
+    product = pb_session.new_products.get(product_id)
     product.is_live = True
     pb_session.products.update(product, is_lite=True)
+
+
+def new_product(product: pb_schemas.Product):
+    pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB, edit_mode=True)
+    pb_session.new_products.create(_old_product_to_new(product, pb_session))
+
+
+# Delete after new_product
+def _get_format_str(pb_session: pb_admin.PbSession):
+    formats = pb_session.formats.get_list()
+
+    def inner(format_ids: list[int]):
+        result = []
+        for f in formats:
+            if f.ident in format_ids:
+                result.append(f.title)
+        return ', '.join(result)
+
+    return inner
+
+
+def _get_creator_id(product: pb_admin.schemas.Product, pb_session: pb_admin.PbSession) -> int | None:
+    if not product.author_name:
+        return None
+    creators = pb_session.creators.get_list()
+    for c in creators:
+        if c.name.lower() == product.author_name.lower():
+            return c.ident
+    new_creator = pb_admin.schemas.Creator(
+        name=product.author_name,
+        link=product.author_url,
+        description=product.author_name,
+    )
+    creator = pb_session.creators.create(new_creator)
+    return creator.ident
+
+
+def _make_raw_img(old_img: pb_admin.schemas.Image, pb_session: pb_admin.PbSession) -> pb_admin.schemas.Image:
+    url = old_img.original_url.replace('//storage', '/storage')
+    img_data = pb_session.session.get(url)
+    img_data.raise_for_status()
+    img_data = img_data.content
+    return pb_admin.schemas.Image(
+        data=img_data,
+        mime_type=old_img.mime_type,
+        file_name=old_img.file_name,
+        alt=old_img.alt,
+    )
+
+
+def _make_raw_presentation(images: list[pb_admin.schemas.Image]) -> list[list[pb_admin.schemas.ProductLayoutImg | pb_admin.schemas.ProductLayoutVideo]]:
+    result = []
+    for i in range(len(images)):
+        result.append([pb_admin.schemas.ProductLayoutImg(img_n=i)])
+    return result
+
+
+def _old_product_to_new(old_product: pb_admin.schemas.Product, pb_session: pb_admin.PbSession) -> pb_admin.schemas.NewProduct:
+    get_format_str = _get_format_str(pb_session)
+    product_types = {
+        pb_admin.schemas.ProductType.freebie: pb_admin.schemas.NewProductType.freebie,
+        pb_admin.schemas.ProductType.plus: pb_admin.schemas.NewProductType.plus,
+        pb_admin.schemas.ProductType.premium: pb_admin.schemas.NewProductType.premium,
+    }
+
+    # Prices
+    FREEBIE_PRICE_EXT = 4900
+    PLUS_PRICE = 1700
+    PLUS_PRICE_EXT = 9900
+    if old_product.product_type == pb_admin.schemas.ProductType.freebie:
+        price_commercial_cent = 0
+        if old_product.author_name:
+            price_extended_cent = None
+        else:
+            price_extended_cent = FREEBIE_PRICE_EXT
+        price_commercial_sale_cent = None
+        price_extended_sale_cent = None
+    elif old_product.product_type == pb_admin.schemas.ProductType.plus:
+        if old_product.author_name:
+            price_commercial_cent = 0
+            price_extended_cent = None
+        else:
+            price_commercial_cent = PLUS_PRICE
+            price_extended_cent = PLUS_PRICE_EXT
+        price_commercial_sale_cent = None
+        price_extended_sale_cent = None
+    elif old_product.product_type == pb_admin.schemas.ProductType.premium:
+        price_commercial_cent = old_product.standard_price_old if old_product.standard_price_old else old_product.standard_price
+        price_commercial_cent = price_commercial_cent * 100
+        price_extended_cent = old_product.extended_price if old_product.extended_price else old_product.extended_price_old
+        price_extended_cent = price_extended_cent * 100
+        price_commercial_sale_cent = old_product.standard_price if old_product.standard_price_old else None
+        price_commercial_sale_cent = price_commercial_sale_cent * 100 if price_commercial_sale_cent else None
+        price_extended_sale_cent = old_product.extended_price if old_product.extended_price_old else None
+        price_extended_sale_cent = price_extended_sale_cent * 100 if price_extended_sale_cent else None
+
+    # Images
+    images = []
+    if old_product.main_image_retina:
+        images.append(old_product.main_image_retina)
+    elif old_product.main_image:
+        images.append(old_product.main_image)
+    elif old_product.old_img_retina:
+        images.append(old_product.old_img_retina)
+    elif old_product.old_img:
+        images.append(old_product.old_img)
+
+    if old_product.product_type != pb_admin.schemas.ProductType.premium:
+        if old_product.gallery_images_retina:
+            images.extend(old_product.gallery_images_retina)
+        elif old_product.gallery_images:
+            images.extend(old_product.gallery_images)
+    else:
+        if old_product.gallery_images_retina:
+            images.extend(old_product.gallery_images_retina[1:])
+        elif old_product.gallery_images:
+            images.extend(old_product.gallery_images[1:])
+
+    # Buttons
+    if old_product.product_type != pb_admin.schemas.ProductType.premium and (old_product.custom_url or old_product.card_button_link or old_product.live_preview_link):
+        custom_btn_text = old_product.custom_url_title or old_product.live_preview_text or old_product.button_text or old_product.card_button_text or 'Download'
+        custom_btn_url = old_product.custom_url or old_product.card_button_link or old_product.live_preview_link
+    else:
+        custom_btn_text = None
+        custom_btn_url = None
+
+    # Creator
+    creator_id = _get_creator_id(old_product, pb_session)
+
+    # formats
+    if old_product.format_ids:
+        formats = get_format_str(old_product.format_ids)
+    elif old_product.features_short:
+        for f in old_product.features_short:
+            if 'format' in f.title.lower():
+                formats = f.value
+                break
+    else:
+        formats = None
+    #size
+    if old_product.size:
+        size = old_product.size
+    elif old_product.features_short:
+        for f in old_product.features_short:
+            if 'size' in f.title.lower():
+                size = f.value
+                break
+    else:
+        size = 'unknown'
+
+    # Categories
+    category_id = old_product.category_ids[0]
+
+    return pb_admin.schemas.NewProduct(
+        title=old_product.title[:100],
+        slug=old_product.slug,
+        created_at=old_product.created_at,
+        is_live=old_product.is_live,
+        product_type=product_types[old_product.product_type],
+        only_registered_download=old_product.email_download,
+        creator_id=creator_id or 1,
+        size=size,
+        category_id=category_id,
+        excerpt=old_product.short_description,
+        description=old_product.description,
+        price_commercial_cent=price_commercial_cent,
+        price_extended_cent=price_extended_cent,
+        price_commercial_sale_cent=price_commercial_sale_cent,
+        price_extended_sale_cent=price_extended_sale_cent,
+        thumbnail=_make_raw_img(old_product.thumbnail_retina if old_product.thumbnail_retina else old_product.thumbnail, pb_session),
+        push_image=_make_raw_img(old_product.push_image, pb_session) if old_product.push_image else None,
+        tags_ids=old_product.tags_ids,
+        font_ids=old_product.font_ids,
+        formats=formats,
+        images=[_make_raw_img(i, pb_session) for i in images],
+        presentation=_make_raw_presentation(images),
+        vps_path=old_product.vps_path,
+        s3_path=old_product.s3_path,
+        meta_title=old_product.meta_title,
+        meta_description=old_product.meta_description,
+        meta_keywords=old_product.meta_keywords,
+        custom_url=custom_btn_url,
+        custom_url_title=custom_btn_text,
+    )
