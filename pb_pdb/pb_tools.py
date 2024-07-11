@@ -87,7 +87,7 @@ def add_tags(product_id: int, product_type: pb_schemas.ProductType, tags: list[s
 def get_creator_id_by_name(creator_name: str | None, creator_link: str | None) -> int:
     if not creator_name or not creator_link:
         return 1
-    pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
+    pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB, edit_mode=True)
     creators = pb_session.creators.get_list()
     for creator in creators:
         if creator.name.lower() == creator_name.lower().strip():
@@ -99,7 +99,8 @@ def get_creator_id_by_name(creator_name: str | None, creator_link: str | None) -
     )
     creator = pb_session.creators.create(new_creator)
     return creator.ident
-    
+
+
 def get_category_id_by_names(category_names: list[str]) -> int | None:
     pb_session = pb_admin.PbSession(SITE_URL, LOGIN_PB, PASS_PB)
     for category_name in category_names:
