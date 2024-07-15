@@ -61,8 +61,6 @@ def get_file_urls(product) -> schemas.ProductFiles:
     )
     if img_for_push:
         result.push_url = get_s3_link(client, img_for_push)
-    if isinstance(product, schemas.UploadPrem):
-        result.prem_thumbnail_x2_url = result.thumbnail_x2_url
 
     client.close()
     return result
