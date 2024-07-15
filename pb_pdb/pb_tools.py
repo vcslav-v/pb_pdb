@@ -172,8 +172,8 @@ def upload_product(
         product_type = pb_schemas.NewProductType.premium
         price_commercial_cent = product.standart_price * 100
         price_extended_cent = product.extended_price * 100
-        price_commercial_sale_cent = product.sale_standart_price * 100
-        price_extended_sale_cent = product.sale_extended_price * 100
+        price_commercial_sale_cent = product.sale_standart_price * 100 if product.sale_standart_price else None
+        price_extended_sale_cent = product.sale_extended_price * 100 if product.sale_extended_price else None
     else:
         raise ValueError('Wrong product type')
 
