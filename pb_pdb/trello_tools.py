@@ -18,6 +18,7 @@ TRELLO_AUTH_KEY = os.environ.get(
 )
 TRELLO_APP_KEY = os.environ.get('TRELLO_APP_KEY', '')
 BIG_PRODUCT_LABEL = os.environ.get('BIG_PRODUCT_LABEL', 'The big product')
+EXTRA_PRODUCT_LABEL = os.environ.get('EXTRA_PRODUCT_LABEL', 'Extra product')
 END_PRODUCTION_LIST = os.environ.get('END_PRODUCTION_LIST', 'Title, Description')
 
 
@@ -70,6 +71,7 @@ def add_trello_product(card_id: str):
     _own_id, _parrent_uid, work_title = get_full_name(product_card['name'])
     labels = [label['name'] for label in product_card['labels']]
     is_big_product = BIG_PRODUCT_LABEL in labels
+    is_extra_product = EXTRA_PRODUCT_LABEL in labels
     category = db_tools.get_exist_category_from_list(labels)
     if not category:
         raise ValueError(f'ERROR Wrong category label - {work_title}')
@@ -93,6 +95,7 @@ def add_trello_product(card_id: str):
         category=category,
         parrent_id=parrent_product,
         is_big_product=is_big_product,
+        is_extra_product=is_extra_product,
     )
 
     designer = schemas.Employee(
@@ -125,7 +128,6 @@ def make_subproduct(card_id: str) -> str:
         else:
             trello.cards.delete_attachment_idAttachment(attach['id'], card_id)
 
-
     for short_link_card, attach_id in short_link_cards:
         card = trello.cards.get(short_link_card)
         _, parrent_uid, _ = get_full_name(card['name'])
@@ -141,9 +143,16 @@ def make_final_text(card_id: str):
     product_card = trello.cards.get(card_id)
     labels = [label['name'] for label in product_card['labels']]
     is_big_product = BIG_PRODUCT_LABEL in labels
+    is_extra_product = EXTRA_PRODUCT_LABEL in labels
     description = product_card['desc']
     own_id, parrent_uid, title = get_full_name(product_card['name'])
-    db_tools.make_final_text(card_id, product_card['name'], title, description, is_big_product)
+    db_tools.make_final_text(
+        card_id,
+        product_card['name'],
+        title, description,
+        is_big_product,
+        is_extra_product
+    )
 
 
 def publish(card_id: str):

@@ -33,6 +33,7 @@ class ProductInPage(BaseModel):
     start_date: date
     end_production_date: Optional[date] = None
     is_big: bool = False
+    is_extra: bool = False
     adobe_count: int = 0
 
 
@@ -66,6 +67,7 @@ class FilterPage(BaseModel):
     category_id: Optional[int] = None
     end_design_date_start: Optional[date] = None
     end_design_date_end: Optional[date] = None
+    is_extra: bool = False
 
 
 class UploadProduct(BaseModel):

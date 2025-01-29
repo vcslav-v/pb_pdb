@@ -80,7 +80,14 @@ def is_child(card_id: str) -> bool:
             return bool(db_product.parent_id)
 
 
-def make_final_text(card_id: str, card_name: str, title: str, description: str, is_big_product: bool = False):
+def make_final_text(
+    card_id: str,
+    card_name: str,
+    title: str,
+    description: str,
+    is_big_product: bool = False,
+    is_extra_product: bool = False,
+):
     with SessionLocal() as session:
         db_product = session.query(models.Product).filter_by(
             trello_card_id=card_id
@@ -95,6 +102,7 @@ def make_final_text(card_id: str, card_name: str, title: str, description: str, 
         db_product.description = description
         db_product.work_directory = new_path
         db_product.is_big_product = is_big_product
+        db_product.is_extra = is_extra_product
         session.commit()
 
 
@@ -133,6 +141,7 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
                     models.Product.end_production_date <= filter_data.end_design_date_end,
                 )
             )
+        query = query.filter(models.Product.is_extra == filter_data.is_extra)
         query.order_by(models.Product.end_production_date.desc())
 
         all_db_products = query.count()
@@ -152,6 +161,7 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
                     models.Product.end_production_date <= filter_data.end_design_date_end,
                 )
             )
+        query = query.filter(models.Product.is_extra == filter_data.is_extra)
 
         result.number_big_products = query.count()
 
@@ -167,6 +177,7 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
                     models.Product.end_production_date <= filter_data.end_design_date_end,
                 )
             )
+        query = query.filter(models.Product.is_extra == filter_data.is_extra)
         result.total_adobe_count = query.scalar()
 
         for db_product in db_products:
@@ -178,6 +189,7 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
                 trello_link=db_product.trello_link,
                 start_date=db_product.start_date,
                 is_big=db_product.is_big_product,
+                is_extra=db_product.is_extra,
                 adobe_count=db_product.adobe_count,
             ))
             if db_product.end_production_date:
