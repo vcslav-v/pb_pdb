@@ -190,7 +190,7 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
                 start_date=db_product.start_date,
                 is_big=db_product.is_big_product,
                 is_extra=db_product.is_extra,
-                adobe_count=db_product.adobe_count,
+                adobe_count=db_product.adobe_count or 0,
             ))
             if db_product.end_production_date:
                 result.products[-1].end_production_date = db_product.end_production_date
