@@ -178,7 +178,7 @@ def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
                 )
             )
         query = query.filter(models.Product.is_extra == filter_data.is_extra)
-        result.total_adobe_count = query.scalar()
+        result.total_adobe_count = query.scalar() or 0
 
         for db_product in db_products:
             result.products.append(schemas.ProductInPage(
