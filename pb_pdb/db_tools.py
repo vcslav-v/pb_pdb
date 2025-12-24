@@ -373,13 +373,25 @@ def get_product_img(product_id: int):
 
 
 def refresh_adobe():
+    batch_size = 100
     with SessionLocal() as session:
-        products = session.query(models.Product).all()
-        for product in products:
-            product.adobe_count = dropbox_tools.get_adobe_count(product.work_directory)
-            if not product.is_big_product and product.adobe_count == 0:
-                product.adobe_count = 1
-            logger.debug(f'Product {product.readable_uid} has {product.adobe_count} adobe files')
+        last_id = 0
+        while True:
+            products = (
+                session.query(models.Product)
+                .filter(models.Product.id > last_id)
+                .order_by(models.Product.id)
+                .limit(batch_size)
+                .all()
+            )
+            if not products:
+                break
+            for product in products:
+                product.adobe_count = dropbox_tools.get_adobe_count(product.work_directory)
+                if not product.is_big_product and product.adobe_count == 0:
+                    product.adobe_count = 1
+                logger.debug(f'Product {product.readable_uid} has {product.adobe_count} adobe files')
+                last_id = product.id
             session.commit()
 
 
