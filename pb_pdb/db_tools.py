@@ -448,19 +448,20 @@ def deactivate_bulk_tag_task(db_id: int):
 
 def get_all_products_data():
     with SessionLocal() as session:
-        products = session.query(
-            models.Product.trello_card_id,
-            models.Product.readable_uid,
-            models.Product.work_title,
-            models.Product.title,
-            models.Category.name.label("category"),
-            models.Product.dropbox_share_url,
-            models.Product.trello_link,
-            models.Product.done,
-        ).join(
-            models.Category, models.Product.category_id == models.Category.id
+        products = (
+            session.query(
+                models.Product.trello_card_id,
+                models.Product.readable_uid,
+                models.Product.work_title,
+                models.Product.title,
+                models.Category.name.label("category"),
+                models.Product.dropbox_share_url,
+                models.Product.trello_link,
+                models.Product.done,
+                models.Product.cover.isnot(None).label("has_cover"),
+            )
+            .join(models.Category, models.Product.category_id == models.Category.id)
         )
-        
 
         rows = products.all()
 
@@ -473,16 +474,24 @@ def get_all_products_data():
             "dropbox_share_url",
             "trello_link",
             "done",
+            "has_cover",
         ])
 
-        df["img_url"] = df["trello_card_id"].apply(
-            lambda x: config.IMG_PRODUCT_IMG_TEMPLATE.format(trello_card_id=x)
+        df["img_url"] = df.apply(
+            lambda row: (
+                config.IMG_PRODUCT_IMG_TEMPLATE.format(
+                    trello_card_id=row["trello_card_id"]
+                )
+                if row["has_cover"]
+                else None
+            ),
+            axis=1,
         )
-        df = df.drop(columns=["trello_card_id"])
+
+        df = df.drop(columns=["trello_card_id", "has_cover"])
 
         table_name = "pb_trello_products"
         yield table_name, df
-
 
 def get_trello_cover(trello_card_id: str):
     with SessionLocal() as session:
