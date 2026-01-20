@@ -456,6 +456,7 @@ def get_all_products_data():
             models.Category.name.label("category"),
             models.Product.dropbox_share_url,
             models.Product.trello_link,
+            models.Product.done,
         ).join(
             models.Category, models.Product.category_id == models.Category.id
         )
@@ -471,6 +472,7 @@ def get_all_products_data():
             "category",
             "dropbox_share_url",
             "trello_link",
+            "done",
         ])
 
         df["img_url"] = df["trello_card_id"].apply(
