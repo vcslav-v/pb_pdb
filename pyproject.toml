@@ -21,6 +21,11 @@ pydantic = "^2.4.2"
 loguru = "^0.7.2"
 alembic = "^1.12.1"
 pb-admin = {git = "https://github.com/vcslav-v/pb_admin.git"}
+numpy = "^2.4.1"
+pandas = "^2.3.3"
+google-cloud-bigquery = "^3.40.0"
+dotenv = "^0.9.9"
+pyarrow = "^23.0.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^5.0.4"

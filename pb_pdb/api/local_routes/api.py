@@ -4,7 +4,7 @@ import secrets
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from loguru import logger
-from pb_pdb import schemas, trello_tools, db_tools
+from pb_pdb import schemas, trello_tools, db_tools, bq_tools
 from pb_pdb.api import service
 
 
@@ -176,3 +176,27 @@ def bulk_tag_count_tasks(
     _: str = Depends(get_current_username)
 ) -> int:
     return db_tools.get_bulk_tag_count_tasks()
+
+@router.post('/sync_bq')
+@logger.catch
+def sync_bq(
+    _: str = Depends(get_current_username)
+):
+    bq_tools.sync()
+
+
+@router.get("/trello_product/img/{trello_card_id}.jpg")
+@logger.catch
+def get_trello_product_img(trello_card_id: str):
+    img_bytes = db_tools.get_trello_cover(trello_card_id)
+
+    if not img_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found",
+        )
+
+    return Response(
+        content=img_bytes,
+        media_type="image/jpeg",
+    )

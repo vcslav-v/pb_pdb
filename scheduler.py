@@ -1,4 +1,4 @@
-from pb_pdb import db_tools
+from pb_pdb import db_tools, bq_tools
 from loguru import logger
 
 
@@ -7,4 +7,6 @@ if __name__ == '__main__':
     db_tools.set_covers()
     logger.info('Start refresh adobe counts task')
     db_tools.refresh_adobe()
+    logger.info('Start sync BQ task')
+    bq_tools.sync()
     logger.info('Finished refresh adobe counts task')

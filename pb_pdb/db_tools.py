@@ -3,8 +3,9 @@ from math import ceil
 from typing import Optional
 
 from sqlalchemy import and_, func
+import pandas as pd
 
-from pb_pdb import dropbox_tools, models, schemas, trello_tools
+from pb_pdb import dropbox_tools, models, schemas, trello_tools, config
 from pb_pdb.db import SessionLocal
 from PIL import Image
 import io
@@ -13,6 +14,7 @@ from loguru import logger
 
 PRODUCTS_ON_PAGE = 12
 RESIZE_COVER_WIDTH = 640
+IMG_PRODUCT_IMG_TEMPLATE = 'https://pb-pdb.herokuapp.com/api/trello_product/img/{trello_card_id}'
 
 
 def get_exist_category_from_list(labels: list[str]) -> Optional[str]:
@@ -442,3 +444,50 @@ def deactivate_bulk_tag_task(db_id: int):
         ).first()
         task.in_progress = False
         session.commit()
+
+
+def get_all_products_data():
+    with SessionLocal() as session:
+        products = session.query(
+            models.Product.trello_card_id,
+            models.Product.readable_uid,
+            models.Product.work_title,
+            models.Product.title,
+            models.Category.name.label("category"),
+            models.Product.dropbox_share_url,
+            models.Product.trello_link,
+        ).join(
+            models.Category, models.Product.category_id == models.Category.id
+        )
+        
+
+        rows = products.all()
+
+        df = pd.DataFrame(rows, columns=[
+            "trello_card_id",
+            "readable_uid",
+            "work_title",
+            "title",
+            "category",
+            "dropbox_share_url",
+            "trello_link",
+        ])
+
+        df["img_url"] = df["trello_card_id"].apply(
+            lambda x: config.IMG_PRODUCT_IMG_TEMPLATE.format(trello_card_id=x)
+        )
+        df = df.drop(columns=["trello_card_id"])
+
+        table_name = "pb_trello_products"
+        yield table_name, df
+
+
+def get_trello_cover(trello_card_id: str):
+    with SessionLocal() as session:
+        product = session.query(models.Product).filter_by(
+            trello_card_id=trello_card_id
+        )
+        product = product.first()
+        if not product:
+            return
+        return product.cover
