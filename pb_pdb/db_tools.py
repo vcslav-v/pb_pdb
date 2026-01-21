@@ -506,6 +506,7 @@ def get_all_products_data():
         df = pd.DataFrame(rows, columns=[
             "trello_card_id",
             "readable_uid",
+            "description",
             "work_title",
             "title",
             "category",
