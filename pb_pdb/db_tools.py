@@ -1,5 +1,6 @@
 from datetime import datetime
 from math import ceil
+import re
 from typing import Optional
 
 from sqlalchemy import and_, func
@@ -446,12 +447,49 @@ def deactivate_bulk_tag_task(db_id: int):
         session.commit()
 
 
+def _extract_tags(text: str) -> list[str] | None:
+    """
+    Извлекает список тегов из строки.
+    Теги читаются ТОЛЬКО до конца строки (до перевода строки).
+    Возвращает None, если теги не найдены.
+    """
+
+    if not text or not isinstance(text, str):
+        return None
+
+    pattern = re.compile(
+        r"""
+        (?:\*\*\s*)?        # необязательные **
+        теги                # слово "теги"
+        (?:\s*\*\*)?        # необязательные **
+        \s*:\s*             # двоеточие
+        ([^\r\n]+)          # ВСЁ до конца строки
+        """,
+        re.IGNORECASE | re.VERBOSE
+    )
+
+    match = pattern.search(text)
+    if not match:
+        return None
+
+    raw_tags = match.group(1)
+
+    tags = [
+        tag.lower().strip()
+        for tag in raw_tags.split(',')
+        if tag.strip()
+    ]
+
+    return tags or None
+
+
 def get_all_products_data():
     with SessionLocal() as session:
         products = (
             session.query(
                 models.Product.trello_card_id,
                 models.Product.readable_uid,
+                models.Product.description,
                 models.Product.work_title,
                 models.Product.title,
                 models.Category.name.label("category"),
@@ -488,10 +526,29 @@ def get_all_products_data():
             axis=1,
         )
 
-        df = df.drop(columns=["trello_card_id", "has_cover"])
+        df = df.drop(columns=["trello_card_id", "has_cover", "description"])
 
         table_name = "pb_trello_products"
         yield table_name, df
+    
+    tag_connections = []
+    for row in rows:
+        if not row.description:
+            continue
+        tags = _extract_tags(row.description)
+        if not tags:
+            continue
+        _tag_connections = [{
+            "readable_uid": row.readable_uid,
+            "tag": t.strip(),
+        } for t in tags]
+        tag_connections.extend(_tag_connections)
+    df_tags = pd.DataFrame(tag_connections, columns=[
+        "readable_uid",
+        "tag",
+    ])
+    table_name = "pb_trello_product_tags"
+    yield table_name, df_tags
 
 def get_trello_cover(trello_card_id: str):
     with SessionLocal() as session:
