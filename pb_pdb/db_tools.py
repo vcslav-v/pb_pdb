@@ -497,6 +497,9 @@ def get_all_products_data():
                 models.Product.trello_link,
                 models.Product.done,
                 models.Product.cover.isnot(None).label("has_cover"),
+                models.Product.start_date,
+                models.Product.end_production_date,
+                models.Product.end_date,
             )
             .join(models.Category, models.Product.category_id == models.Category.id)
         )
@@ -514,6 +517,9 @@ def get_all_products_data():
             "trello_link",
             "done",
             "has_cover",
+            "start_date",
+            "end_production_date",
+            "end_date",
         ])
 
         df["img_url"] = df.apply(
