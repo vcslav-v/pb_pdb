@@ -164,3 +164,11 @@ class BulkTag(BaseModel):
     tag: str
     products: list[pb_schemas.Product]
     db_id: Optional[int] = None
+
+
+class TrelloCreatorProduct(BaseModel):
+    '''TrelloCreatorProduct model'''
+
+    creator_id: int | None
+    freelance_id: str | None
+    product_ids: list[int]

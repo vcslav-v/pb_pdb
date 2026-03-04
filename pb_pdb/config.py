@@ -38,3 +38,8 @@ BQ_PROJECT = os.environ.get('BQ_PROJECT', '')
 BQ_DATASET = os.environ.get('BQ_DATASET', '')
 
 IMG_PRODUCT_IMG_TEMPLATE = os.environ.get('IMG_PRODUCT_IMG_TEMPLATE', '')
+
+# Adobe parser
+ADOBE_PARSER_API_LOGIN = os.environ.get('ADOBE_PARSER_API_LOGIN', 'api')
+ADOBE_PARSER_API_PASSWORD = os.environ.get('ADOBE_PARSER_API_PASSWORD', 'pass')
+ADOBE_PARSER_API_URL = os.environ.get('ADOBE_PARSER_API_URL', 'http://127.0.0.1:8050')

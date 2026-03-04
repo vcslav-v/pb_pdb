@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import requests
 from trello import TrelloApi
 
-from pb_pdb import db_tools, schemas
+from pb_pdb import config, db_tools, schemas
 from loguru import logger
 
 from datetime import datetime
@@ -20,6 +20,55 @@ TRELLO_APP_KEY = os.environ.get('TRELLO_APP_KEY', '')
 BIG_PRODUCT_LABEL = os.environ.get('BIG_PRODUCT_LABEL', 'The big product')
 EXTRA_PRODUCT_LABEL = os.environ.get('EXTRA_PRODUCT_LABEL', 'Extra product')
 END_PRODUCTION_LIST = os.environ.get('END_PRODUCTION_LIST', 'Title, Description')
+
+def _parse_int_list(s: str) -> list[int]:
+    if not s:
+        return []
+    return [int(x) for x in re.findall(r"-?\d+", s)]
+
+
+def _trello_get(path, **params):
+    r = requests.get(
+        f"https://api.trello.com/1{path}",
+        params={"key": TRELLO_APP_KEY, "token": TRELLO_AUTH_KEY, **params},
+        timeout=30,
+    )
+    r.raise_for_status()
+    return r.json()
+
+def _get_card_custom_fields(card_id: str) -> dict:
+    card = _trello_get(f"/cards/{card_id}", fields="idBoard")
+    board_id = card["idBoard"]
+
+    board_fields = _trello_get(f"/boards/{board_id}/customFields")
+    field_by_id = {f["id"]: f for f in board_fields}
+
+    options_by_field = {}
+    for f in board_fields:
+        if f.get("type") == "list":
+            options_by_field[f["id"]] = {o["id"]: o["value"]["text"] for o in f.get("options", [])}
+
+    items = _trello_get(f"/cards/{card_id}/customFieldItems")
+
+    result = {}
+    for it in items:
+        fid = it["idCustomField"]
+        fdef = field_by_id.get(fid)
+        if not fdef:
+            continue
+
+        name = fdef.get("name", fid)
+        ftype = fdef.get("type")
+
+        if ftype == "list":  # dropdown
+            id_value = it.get("idValue")
+            result[name] = options_by_field.get(fid, {}).get(id_value, id_value)
+        else:
+            v = it.get("value") or {}
+            result[name] = v.get("text") or v.get("number") or v.get("date") or v.get("checked")
+
+    return result
+
 
 
 def get_dropbox_link_from_attachs(attachs: list[dict]) -> Optional[str]:
@@ -156,7 +205,23 @@ def make_final_text(card_id: str):
 
 
 def publish(card_id: str):
-    db_tools.publish_product(card_id)
+    custom_fields = _get_card_custom_fields(card_id)
+    adobe_ids = _parse_int_list(custom_fields.get('Adobe IDs', ''))
+    if custom_fields.get('Freelance Type', '').strip() and custom_fields.get('Freelance ID', '').strip():
+        freelance_id = f"{custom_fields.get('Freelance Type', '')}|{custom_fields.get('Freelance ID', '')}"
+    else:
+        freelance_id = None
+    designer_outer_id = db_tools.publish_product(card_id)
+    data = schemas.TrelloCreatorProduct(
+        creator_id=designer_outer_id,
+        freelance_id=freelance_id,
+        product_ids=adobe_ids,
+    )
+    requests.post(f'{config.ADOBE_PARSER_API_URL}/api/update_trello_creator_product',
+        data=data.model_dump_json(),
+        auth=(config.ADOBE_PARSER_API_LOGIN, config.ADOBE_PARSER_API_PASSWORD),
+        timeout=30
+    )
 
 
 def get_end_production_date(card_id):

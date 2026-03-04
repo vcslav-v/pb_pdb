@@ -65,6 +65,7 @@ class Employee(Base):
     trello_id = Column(Text, unique=True)
     full_name = Column(Text)
     user_pick = Column(LargeBinary)
+    outer_id = Column(Integer)
 
     products_as_designer = relationship('Product', back_populates='designer')
 
