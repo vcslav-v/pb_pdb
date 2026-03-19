@@ -172,3 +172,4 @@ class TrelloCreatorProduct(BaseModel):
     creator_id: int | None
     freelance_id: str | None
     product_ids: list[int]
+    is_extra: bool = False

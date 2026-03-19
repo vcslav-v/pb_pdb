@@ -205,6 +205,11 @@ def make_final_text(card_id: str):
 
 
 def publish(card_id: str):
+    trello = TrelloApi(TRELLO_APP_KEY)
+    trello.set_token(TRELLO_AUTH_KEY)
+    product_card = trello.cards.get(card_id)
+    labels = [label['name'] for label in product_card['labels']]
+    is_extra = EXTRA_PRODUCT_LABEL in labels
     custom_fields = _get_card_custom_fields(card_id)
     adobe_ids = _parse_int_list(custom_fields.get('Adobe IDs', ''))
     if custom_fields.get('Freelance Type', '').strip() and custom_fields.get('Freelance ID', '').strip():
@@ -216,6 +221,7 @@ def publish(card_id: str):
         creator_id=designer_outer_id,
         freelance_id=freelance_id,
         product_ids=adobe_ids,
+        is_extra=is_extra,
     )
     requests.post(f'{config.ADOBE_PARSER_API_URL}/api/update_trello_creator_product',
         data=data.model_dump_json(),
