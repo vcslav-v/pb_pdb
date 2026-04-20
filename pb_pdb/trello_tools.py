@@ -205,6 +205,7 @@ def make_final_text(card_id: str):
 
 
 def publish(card_id: str):
+    logger.info(f'Publishing card {card_id}')
     trello = TrelloApi(TRELLO_APP_KEY)
     trello.set_token(TRELLO_AUTH_KEY)
     product_card = trello.cards.get(card_id)
@@ -223,11 +224,12 @@ def publish(card_id: str):
         product_ids=adobe_ids,
         is_extra=is_extra,
     )
-    requests.post(f'{config.ADOBE_PARSER_API_URL}/api/update_trello_creator_product',
+    response = requests.post(f'{config.ADOBE_PARSER_API_URL}/api/update_trello_creator_product',
         data=data.model_dump_json(),
         auth=(config.ADOBE_PARSER_API_LOGIN, config.ADOBE_PARSER_API_PASSWORD),
         timeout=30
     )
+    logger.info(f'Publish response: {response.status_code} {response.text}')
 
 
 def get_end_production_date(card_id):
