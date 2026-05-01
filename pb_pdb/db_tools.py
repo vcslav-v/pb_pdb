@@ -129,6 +129,19 @@ def publish_product(card_id: str) -> int | None:
     return db_designer.outer_id if db_designer else None
 
 
+def get_designer_outer_id(card_id: str) -> int | None:
+    with SessionLocal() as session:
+        db_product = session.query(models.Product).filter_by(
+            trello_card_id=card_id
+        ).first()
+        if not db_product:
+            return None
+        db_designer = session.query(models.Employee).filter_by(
+            id=db_product.designer_id
+        ).first()
+    return db_designer.outer_id if db_designer else None
+
+
 def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
     result = schemas.ProductPage()
     result.page = filter_data.page

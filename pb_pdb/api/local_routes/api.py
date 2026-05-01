@@ -185,6 +185,24 @@ def sync_bq(
     bq_tools.sync()
 
 
+@router.get('/republish_done_cards')
+@logger.catch
+def republish_done_cards():
+    results = trello_tools.republish_done_cards()
+    return results
+
+
+@router.get('/done_cards_csv')
+@logger.catch
+def done_cards_csv():
+    csv_data = trello_tools.get_done_cards_csv()
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=done_cards.csv"},
+    )
+
+
 @router.get("/trello_product/img/{trello_card_id}.jpg")
 @logger.catch
 def get_trello_product_img(trello_card_id: str):

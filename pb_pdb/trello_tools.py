@@ -1,3 +1,5 @@
+import csv
+import io
 import json
 import os
 import re
@@ -5,7 +7,7 @@ from typing import Optional
 from urllib.parse import urlparse
 
 import requests
-from trello import TrelloApi
+from trello import TrelloApi, cards
 
 from pb_pdb import config, db_tools, schemas
 from loguru import logger
@@ -232,6 +234,68 @@ def publish(card_id: str):
     logger.info(f'Publish response: {response.status_code} {response.text}')
 
 
+def republish_done_cards():
+    """Пройти все карточки из DONE_LIST_NAMES и отправить в adobe parser без обновления БД."""
+    if not TRELLO_BOARD_ID:
+        raise ValueError("TRELLO_BOARD_ID is not set")
+
+    lists = _trello_get(f"/boards/{TRELLO_BOARD_ID}/lists")
+    target_list_ids = {
+        lst["id"] for lst in lists if lst["name"] in DONE_LIST_NAMES
+    }
+
+    if not target_list_ids:
+        logger.warning(f"No lists found matching {DONE_LIST_NAMES}")
+        return []
+
+    results = []
+    for list_id in target_list_ids:
+        cards = _trello_get(f"/lists/{list_id}/cards", fields="name,url,labels")
+        for card in cards:
+            card_id = card["id"]
+            try:
+                labels = [label["name"] for label in card.get("labels", [])]
+                is_extra = EXTRA_PRODUCT_LABEL in labels
+                custom_fields = _get_card_custom_fields(card_id)
+                adobe_ids = _parse_int_list(custom_fields.get("Adobe IDs", ""))
+                if not adobe_ids:
+                    logger.info(f"Skipping card {card_id} - no Adobe IDs")
+                    results.append({"card_id": card_id, "status": "skipped", "reason": "no Adobe IDs"})
+                    continue
+
+                freelance_type = custom_fields.get("Freelance Type", "").strip()
+                freelance_id_val = custom_fields.get("Freelance ID", "").strip()
+                freelance_id = f"{freelance_type}|{freelance_id_val}" if freelance_type and freelance_id_val else None
+
+                designer_outer_id = db_tools.get_designer_outer_id(card_id)
+
+                if not freelance_id and not designer_outer_id:
+                    logger.info(f"Skipping card {card_id} - no freelance_id and no designer_outer_id")
+                    results.append({"card_id": card_id, "status": "skipped", "reason": "no freelance_id and no designer_outer_id"})
+                    continue
+                
+
+                data = schemas.TrelloCreatorProduct(
+                    creator_id=designer_outer_id,
+                    freelance_id=freelance_id,
+                    product_ids=adobe_ids,
+                    is_extra=is_extra,
+                )
+                response = requests.post(
+                    f"{config.ADOBE_PARSER_API_URL}/api/update_trello_creator_product",
+                    data=data.model_dump_json(),
+                    auth=(config.ADOBE_PARSER_API_LOGIN, config.ADOBE_PARSER_API_PASSWORD),
+                    timeout=30,
+                )
+                logger.info(f"Republish card {card_id}: {response.status_code} {response.text}")
+                results.append({"card_id": card_id, "status": "ok", "response_code": response.status_code})
+            except Exception as e:
+                logger.error(f"Error republishing card {card_id}: {e}")
+                results.append({"card_id": card_id, "status": "error", "error": str(e)})
+
+    return results
+
+
 def get_end_production_date(card_id):
     trello = TrelloApi(TRELLO_APP_KEY)
     trello.set_token(TRELLO_AUTH_KEY)
@@ -245,3 +309,52 @@ def get_end_production_date(card_id):
     else:
         return None
     return datetime.fromisoformat(action['date']).date()
+
+
+DONE_LIST_NAMES = {"Done", "Done Freelance"}
+DONE_CARDS_SINCE = datetime(2026, 2, 1)
+
+
+def _card_created_at(card_id: str) -> datetime:
+    """Trello card ID содержит timestamp создания (первые 8 hex-символов)."""
+    timestamp = int(card_id[:8], 16)
+    return datetime.utcfromtimestamp(timestamp)
+
+
+def get_done_cards_csv() -> str:
+    if not TRELLO_BOARD_ID:
+        raise ValueError("TRELLO_BOARD_ID is not set")
+
+    lists = _trello_get(f"/boards/{TRELLO_BOARD_ID}/lists")
+    target_list_ids = {
+        lst["id"] for lst in lists if lst["name"] in DONE_LIST_NAMES
+    }
+
+    if not target_list_ids:
+        logger.warning(f"No lists found matching {DONE_LIST_NAMES}")
+        return ""
+
+    rows = []
+    for list_id in target_list_ids:
+        cards = _trello_get(f"/lists/{list_id}/cards", fields="name,url")
+        for card in cards:
+            created = _card_created_at(card["id"])
+            if created < DONE_CARDS_SINCE:
+                continue
+
+            custom_fields = _get_card_custom_fields(card["id"])
+            adobe_ids = _parse_int_list(custom_fields.get("Adobe IDs", ""))
+            if not adobe_ids:
+                continue
+            _, _, title = get_full_name(card["name"])
+            rows.append({
+                "title": title,
+                "url": card["url"],
+                "adobe_ids": ", ".join(str(x) for x in adobe_ids),
+            })
+
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=["title", "url", "adobe_ids"])
+    writer.writeheader()
+    writer.writerows(rows)
+    return output.getvalue()
