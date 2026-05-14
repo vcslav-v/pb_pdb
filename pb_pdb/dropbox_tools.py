@@ -70,6 +70,22 @@ def rename(path: str, new_name: str, title: str, old_title: str) -> str:
     return new_path
 
 
+def upload_empty_file(folder_path: str, file_name: str) -> str:
+    file_path = f'{folder_path}/{file_name}'
+    with dropbox.Dropbox(oauth2_refresh_token=DROPBOX_KEY, app_key=APP_KEY) as dbx:
+        dbx.files_upload(b'', file_path, mode=WriteMode.overwrite)
+    return file_path
+
+
+def delete_file(path: str) -> bool:
+    with dropbox.Dropbox(oauth2_refresh_token=DROPBOX_KEY, app_key=APP_KEY) as dbx:
+        try:
+            dbx.files_delete_v2(path)
+            return True
+        except Exception:
+            return False
+
+
 def get_adobe_count(path: str) -> int:
     with dropbox.Dropbox(oauth2_refresh_token=DROPBOX_KEY, app_key=APP_KEY) as dbx:
         adobe_dir = f'{path}/Adobe'

@@ -74,6 +74,27 @@ def add_product(product: schemas.Product, designer: schemas.Employee) -> str:
         return full_product_name, db_product.dropbox_share_url
 
 
+def get_work_directory(card_id: str) -> Optional[str]:
+    with SessionLocal() as session:
+        db_product = session.query(models.Product).filter_by(
+            trello_card_id=card_id
+        ).first()
+        if not db_product:
+            return None
+        return db_product.work_directory
+
+
+def set_is_adobe_auto(card_id: str, value: bool) -> None:
+    with SessionLocal() as session:
+        db_product = session.query(models.Product).filter_by(
+            trello_card_id=card_id
+        ).first()
+        if not db_product:
+            return
+        db_product.is_adobe_auto = value
+        session.commit()
+
+
 def is_child(card_id: str) -> bool:
     with SessionLocal() as session:
         db_product = session.query(models.Product).filter_by(

@@ -4,7 +4,7 @@ import secrets
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from loguru import logger
-from pb_pdb import schemas, trello_tools, db_tools, bq_tools
+from pb_pdb import schemas, trello_tools, db_tools, bq_tools, dropbox_tools
 from pb_pdb.api import service
 
 
@@ -69,6 +69,32 @@ def publish(card_id: str):
 @logger.catch
 def production_end(card_id: str):
     db_tools.production_end(card_id)
+
+
+@router.get('/create_auto_md')
+@logger.catch
+def create_auto_md(card_id: str):
+    work_directory = db_tools.get_work_directory(card_id)
+    if not work_directory:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'product not found for card_id={card_id}',
+        )
+    dropbox_tools.upload_empty_file(work_directory, 'auto.md')
+    db_tools.set_is_adobe_auto(card_id, True)
+
+
+@router.get('/remove_auto_md')
+@logger.catch
+def remove_auto_md(card_id: str):
+    work_directory = db_tools.get_work_directory(card_id)
+    if not work_directory:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'product not found for card_id={card_id}',
+        )
+    dropbox_tools.delete_file(f'{work_directory}/auto.md')
+    db_tools.set_is_adobe_auto(card_id, False)
 
 
 @router.post('/products')
