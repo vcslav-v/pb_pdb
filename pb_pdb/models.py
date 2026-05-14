@@ -28,6 +28,7 @@ class Product(Base):
     is_big_product = Column(Boolean, default=False)
     adobe_count = Column(Integer, default=0)
     is_extra = Column(Boolean, default=False)
+    is_adobe_auto = Column(Boolean, default=False)
 
     designer_id = Column(Integer, ForeignKey('employees.id'))
     designer = relationship('Employee')
