@@ -1,6 +1,6 @@
 import dropbox
 import os
-from dropbox.files import FolderMetadata
+from dropbox.files import FolderMetadata, WriteMode
 
 DROPBOX_KEY = os.environ.get('DROPBOX_KEY', '')
 APP_KEY = os.environ.get('APP_KEY', '')
