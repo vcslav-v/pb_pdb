@@ -80,7 +80,7 @@ def create_auto_md(card_id: str):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'product not found for card_id={card_id}',
         )
-    dropbox_tools.upload_empty_file(work_directory, 'auto.md')
+    dropbox_tools.set_auto_entry(card_id, work_directory)
     db_tools.set_is_adobe_auto(card_id, True)
 
 
@@ -93,7 +93,7 @@ def remove_auto_md(card_id: str):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'product not found for card_id={card_id}',
         )
-    dropbox_tools.delete_file(f'{work_directory}/auto.md')
+    dropbox_tools.remove_auto_entry(card_id)
     db_tools.set_is_adobe_auto(card_id, False)
 
 

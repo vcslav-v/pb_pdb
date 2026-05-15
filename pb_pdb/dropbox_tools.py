@@ -1,10 +1,14 @@
 import dropbox
+import json
 import os
+from datetime import datetime
+from dropbox.exceptions import ApiError
 from dropbox.files import FolderMetadata, WriteMode
 
 DROPBOX_KEY = os.environ.get('DROPBOX_KEY', '')
 APP_KEY = os.environ.get('APP_KEY', '')
 BRUSH_APES_CATEGORY = os.environ.get('BRUSH_APES_CATEGORY', 'BRUSH APES')
+AUTO_JSON_PATH = '/Products/auto.json'
 
 
 def make_directory(category: str, title: str, full_name: str) -> str:
@@ -84,6 +88,49 @@ def delete_file(path: str) -> bool:
             return True
         except Exception:
             return False
+
+
+def _load_auto_json(dbx):
+    try:
+        metadata, res = dbx.files_download(AUTO_JSON_PATH)
+        return json.loads(res.content.decode('utf-8')), metadata.rev
+    except ApiError:
+        return {}, None
+
+
+def set_auto_entry(card_id: str, work_directory: str) -> None:
+    with dropbox.Dropbox(oauth2_refresh_token=DROPBOX_KEY, app_key=APP_KEY) as dbx:
+        for _ in range(5):
+            data, rev = _load_auto_json(dbx)
+            data[card_id] = {
+                'date': datetime.utcnow().isoformat(),
+                'path': work_directory,
+            }
+            payload = json.dumps(data, ensure_ascii=False, indent=2).encode('utf-8')
+            mode = WriteMode.update(rev) if rev else WriteMode.add
+            try:
+                dbx.files_upload(payload, AUTO_JSON_PATH, mode=mode)
+                return
+            except ApiError:
+                continue
+        raise RuntimeError(f'Failed to update {AUTO_JSON_PATH}')
+
+
+def remove_auto_entry(card_id: str) -> None:
+    with dropbox.Dropbox(oauth2_refresh_token=DROPBOX_KEY, app_key=APP_KEY) as dbx:
+        for _ in range(5):
+            data, rev = _load_auto_json(dbx)
+            if card_id not in data:
+                return
+            data.pop(card_id)
+            payload = json.dumps(data, ensure_ascii=False, indent=2).encode('utf-8')
+            mode = WriteMode.update(rev) if rev else WriteMode.overwrite
+            try:
+                dbx.files_upload(payload, AUTO_JSON_PATH, mode=mode)
+                return
+            except ApiError:
+                continue
+        raise RuntimeError(f'Failed to update {AUTO_JSON_PATH}')
 
 
 def get_adobe_count(path: str) -> int:
