@@ -97,6 +97,32 @@ def remove_auto_md(card_id: str):
     db_tools.set_is_adobe_auto(card_id, False)
 
 
+@router.get('/create_re_auto_md')
+@logger.catch
+def create_re_auto_md(card_id: str):
+    work_directory = db_tools.get_work_directory(card_id)
+    if not work_directory:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'product not found for card_id={card_id}',
+        )
+    dropbox_tools.set_auto_entry(card_id, work_directory, dropbox_tools.RE_AUTO_JSON_PATH)
+    db_tools.set_is_adobe_auto(card_id, True)
+
+
+@router.get('/remove_re_auto_md')
+@logger.catch
+def remove_re_auto_md(card_id: str):
+    work_directory = db_tools.get_work_directory(card_id)
+    if not work_directory:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'product not found for card_id={card_id}',
+        )
+    dropbox_tools.remove_auto_entry(card_id, dropbox_tools.RE_AUTO_JSON_PATH)
+    db_tools.set_is_adobe_auto(card_id, False)
+
+
 @router.post('/products')
 @logger.catch
 def get_products(filter_data: schemas.FilterPage) -> schemas.ProductPage:
