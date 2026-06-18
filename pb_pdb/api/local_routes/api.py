@@ -107,7 +107,6 @@ def create_re_auto_md(card_id: str):
             detail=f'product not found for card_id={card_id}',
         )
     dropbox_tools.set_auto_entry(card_id, work_directory, dropbox_tools.RE_AUTO_JSON_PATH)
-    db_tools.set_is_adobe_auto(card_id, True)
 
 
 @router.get('/remove_re_auto_md')
@@ -120,7 +119,6 @@ def remove_re_auto_md(card_id: str):
             detail=f'product not found for card_id={card_id}',
         )
     dropbox_tools.remove_auto_entry(card_id, dropbox_tools.RE_AUTO_JSON_PATH)
-    db_tools.set_is_adobe_auto(card_id, False)
 
 
 @router.post('/products')
