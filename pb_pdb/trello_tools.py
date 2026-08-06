@@ -9,19 +9,17 @@ from urllib.parse import urlparse
 import requests
 from trello import TrelloApi, cards
 
-from pb_pdb import config, db_tools, schemas
+from pb_pdb import config, db_tools, dropbox_tools, schemas
 from loguru import logger
 
 from datetime import datetime
 
-TRELLO_AUTH_KEY = os.environ.get(
-    'TRELLO_AUTH_KEY',
-    '',
-)
+TRELLO_AUTH_KEY = os.environ.get('TRELLO_AUTH_KEY', '')
 TRELLO_APP_KEY = os.environ.get('TRELLO_APP_KEY', '')
 BIG_PRODUCT_LABEL = os.environ.get('BIG_PRODUCT_LABEL', 'The big product')
 EXTRA_PRODUCT_LABEL = os.environ.get('EXTRA_PRODUCT_LABEL', 'Extra product')
 END_PRODUCTION_LIST = os.environ.get('END_PRODUCTION_LIST', 'Title, Description')
+TRELLO_BOARD_ID = os.environ.get('TRELLO_BOARD_ID', 'Gc2rDw2C')
 
 def _parse_int_list(s: str) -> list[int]:
     if not s:
@@ -159,6 +157,33 @@ def add_trello_product(card_id: str):
     trello.cards.new_attachment(card_id, url=share_link)
 
     return full_product_name
+
+
+def get_product_id_from_card_name(name: str) -> str:
+    raw_name = name.split(' - ')
+    if len(raw_name) < 2:
+        raise ValueError(f'ERROR Wrong card name format - {name}')
+    product_id = raw_name[0].strip()
+    if not product_id or '/' in product_id or '\\' in product_id:
+        raise ValueError(f'ERROR Wrong product id in card name - {name}')
+    return product_id
+
+
+def create_publication_folder(card_id: str) -> schemas.PublicationFolder:
+    trello = TrelloApi(TRELLO_APP_KEY)
+    trello.set_token(TRELLO_AUTH_KEY)
+    product_card = trello.cards.get(card_id)
+    product_id = get_product_id_from_card_name(product_card['name'])
+
+    path = dropbox_tools.make_publication_directory(product_id)
+    share_link = dropbox_tools.get_share_link(path)
+    trello.cards.new_attachment(card_id, url=share_link)
+
+    return schemas.PublicationFolder(
+        product_id=product_id,
+        path=path,
+        share_url=share_link,
+    )
 
 
 def make_subproduct(card_id: str) -> str:

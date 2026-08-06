@@ -173,3 +173,11 @@ class TrelloCreatorProduct(BaseModel):
     freelance_id: str | None
     product_ids: list[int]
     is_extra: bool = False
+
+
+class PublicationFolder(BaseModel):
+    '''PublicationFolder model'''
+
+    product_id: str
+    path: str
+    share_url: str

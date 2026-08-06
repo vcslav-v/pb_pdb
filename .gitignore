@@ -1,3 +1,16 @@
-*.pyc
+__pycache__/
+*.py[cod]
+
+.env
 pb_pdb/.env
 auth.json
+
+.venv/
+venv/
+
+*.pkl
+*.csv
+*.log
+log.txt
+geckodriver
+chromedriver
