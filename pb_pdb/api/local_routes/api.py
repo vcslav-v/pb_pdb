@@ -45,6 +45,18 @@ def add_trello_product(card_id: str):
     return schemas.TrelloProduct(name=name)
 
 
+@router.get('/create_publication_folder')
+@logger.catch
+def create_publication_folder(card_id: str):
+    try:
+        return trello_tools.create_publication_folder(card_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=e.args[0],
+        )
+
+
 @router.get('/make_subproduct_name')
 @logger.catch
 def make_subproduct_name(card_id: str):

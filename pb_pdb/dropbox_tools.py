@@ -10,6 +10,11 @@ APP_KEY = os.environ.get('APP_KEY', '')
 BRUSH_APES_CATEGORY = os.environ.get('BRUSH_APES_CATEGORY', 'BRUSH APES')
 AUTO_JSON_PATH = '/Products/auto.json'
 RE_AUTO_JSON_PATH = '/Products/re_auto.json'
+PUBLICATION_ROOT = os.environ.get(
+    'PUBLICATION_ROOT',
+    '/Products/publication-on-the-website',
+)
+PUBLICATION_SUBFOLDERS = ('psd', 'preview', 'other')
 
 
 def make_directory(category: str, title: str, full_name: str) -> str:
@@ -31,6 +36,20 @@ def make_directory(category: str, title: str, full_name: str) -> str:
         else:
             dbx.files_create_folder_v2(new_dir_path + '/Motion array')
             dbx.files_create_folder_v2(new_dir_path + '/Adobe')
+
+    return new_dir_path
+
+
+def make_publication_directory(product_id: str) -> str:
+    new_dir_path = f'{PUBLICATION_ROOT}/{product_id}'
+    with dropbox.Dropbox(oauth2_refresh_token=DROPBOX_KEY, app_key=APP_KEY) as dbx:
+        try:
+            dbx.files_create_folder_v2(new_dir_path)
+        except Exception:
+            raise ValueError(f'folder is exist already - {product_id}')
+
+        for subfolder in PUBLICATION_SUBFOLDERS:
+            dbx.files_create_folder_v2(f'{new_dir_path}/{subfolder}')
 
     return new_dir_path
 
