@@ -8,11 +8,11 @@ from loguru import logger
 
 DROP_PREFIX = 'temp-browser'
 DO_TOKEN = os.environ.get('DO_TOKEN', '')
-DO_SPACE_REGION = os.environ.get('DO_SPACE_REGION', '')
-DO_SPACE_ENDPOINT = os.environ.get('DO_SPACE_ENDPOINT', '')
+DO_SPACE_REGION = os.environ.get('DO_SPACE_REGION', 'ams3')
+DO_SPACE_ENDPOINT = os.environ.get('DO_SPACE_ENDPOINT', 'https://ams3.digitaloceanspaces.com')
 DO_SPACE_KEY = os.environ.get('DO_SPACE_KEY', '')
 DO_SPACE_SECRET = os.environ.get('DO_SPACE_SECRET', '')
-DO_SPACE_BUCKET = os.environ.get('DO_SPACE_BUCKET', '')
+DO_SPACE_BUCKET = os.environ.get('DO_SPACE_BUCKET', 'temp-pb')
 DO_TRY_COUNT = 6
 
 
